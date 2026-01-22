@@ -1,6 +1,6 @@
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, PrivateAttr
 
 
 class BotUser(BaseModel):
@@ -13,7 +13,7 @@ class BotUser(BaseModel):
     language_code: str
     is_bot: bool
     is_premium: bool
-    _original: Any = Field(default=None, exclude=True)
+    _original: Any = PrivateAttr(default=None)
 
     def get_original(self) -> Any:
         return self._original
