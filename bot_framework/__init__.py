@@ -5,6 +5,11 @@ This package provides core components for building Telegram bots with
 Clean Architecture principles.
 """
 
+from bot_framework.decorators.role_checker import (
+    OperationNotAllowedError,
+    check_message_roles,
+    check_roles,
+)
 from bot_framework.entities.bot_callback import BotCallback
 from bot_framework.entities.bot_message import BotMessage, BotMessageUser
 from bot_framework.entities.bot_user import BotUser
@@ -31,6 +36,10 @@ from bot_framework.protocols.i_notify_replacer import INotifyReplacer
 __version__ = "0.1.0"
 
 __all__ = [
+    # Decorators
+    "OperationNotAllowedError",
+    "check_message_roles",
+    "check_roles",
     # Entities
     "BotCallback",
     "BotMessage",
