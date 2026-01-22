@@ -1,6 +1,6 @@
 [project]
 name = "bot-framework"
-version = "0.1.4"
+version = "0.1.5"
 description = "Reusable Telegram bot framework with Clean Architecture"
 readme = "README.md"
 authors = [
@@ -87,6 +87,7 @@ root_packages = ["bot_framework"]
 name = "bot_framework layers"
 type = "layers"
 layers = [
+    "bot_framework.menus",
     "bot_framework.flows",
     "bot_framework.telegram",
     "bot_framework.flow_management",
