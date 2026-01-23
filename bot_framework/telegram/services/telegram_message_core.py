@@ -36,6 +36,7 @@ class TelegramMessageCore:
     def __init__(
         self,
         bot_token: str,
+        database_url: str | None = None,
         flow_message_storage: IFlowMessageStorage | None = None,
         use_class_middlewares: bool = False,
     ) -> None:
@@ -44,6 +45,23 @@ class TelegramMessageCore:
         self._markdown_escaper = MarkdownEscaper()
         self._markdown_to_html_converter = MarkdownToHtmlConverter()
         self._init_components()
+
+        if database_url:
+            self._setup_ensure_user_middleware(database_url)
+
+    def _setup_ensure_user_middleware(self, database_url: str) -> None:
+        from bot_framework.role_management.repos import RoleRepo, UserRepo
+        from bot_framework.role_management.services import EnsureUserExists
+        from bot_framework.telegram.middleware import EnsureUserMiddleware
+
+        user_repo = UserRepo(database_url=database_url)
+        role_repo = RoleRepo(database_url=database_url)
+        ensure_user_exists = EnsureUserExists(
+            user_repo=user_repo,
+            role_repo=role_repo,
+        )
+        middleware = EnsureUserMiddleware(ensure_user_exists=ensure_user_exists)
+        self.bot.setup_middleware(middleware)
 
     def _init_components(self) -> None:
         from .callback_answerer import CallbackAnswerer
