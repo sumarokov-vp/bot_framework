@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bot_framework.flow_management import RedisFlowMessageStorage
@@ -7,7 +8,8 @@ from bot_framework.flows.request_role_flow import RequestRoleFlowFactory
 from bot_framework.flows.request_role_flow.repos import (
     RedisRequestRoleFlowStateStorage,
 )
-from bot_framework.language_management.providers import PhraseProvider
+from bot_framework.language_management.loaders import LanguageLoader, PhraseLoader
+from bot_framework.language_management.providers import RedisPhraseProvider
 from bot_framework.menus import (
     CommandsMenuSender,
     MainMenuSender,
@@ -38,8 +40,13 @@ class BotApplication:
         bot_token: str,
         database_url: str,
         redis_url: str,
+        phrases_json_path: Path | None = None,
+        languages_json_path: Path | None = None,
         use_class_middlewares: bool = False,
     ) -> None:
+        self._load_languages(redis_url, languages_json_path)
+        self._load_phrases(redis_url, phrases_json_path)
+
         flow_message_storage = RedisFlowMessageStorage(redis_url=redis_url)
         self.core = TelegramMessageCore(
             bot_token=bot_token,
@@ -50,10 +57,40 @@ class BotApplication:
 
         self.user_repo = UserRepo(database_url=database_url)
         self.role_repo = RoleRepo(database_url=database_url)
-        self.phrase_provider = PhraseProvider(database_url=database_url)
+        self.phrase_provider = RedisPhraseProvider(redis_url=redis_url)
         self.phrase_repo = self.phrase_provider  # обратная совместимость
 
         self._setup_menus(redis_url)
+
+    def _load_languages(
+        self,
+        redis_url: str,
+        client_languages_path: Path | None,
+    ) -> None:
+        loader = LanguageLoader(redis_url=redis_url)
+        data_dir = Path(__file__).parent.parent / "data"
+
+        base_path = data_dir / "languages.json"
+        if base_path.exists():
+            loader.load_from_json(base_path)
+
+        if client_languages_path and client_languages_path.exists():
+            loader.load_from_json(client_languages_path)
+
+    def _load_phrases(
+        self,
+        redis_url: str,
+        client_phrases_path: Path | None,
+    ) -> None:
+        loader = PhraseLoader(redis_url=redis_url)
+        data_dir = Path(__file__).parent.parent / "data"
+
+        base_path = data_dir / "phrases.json"
+        if base_path.exists():
+            loader.load_from_json(base_path)
+
+        if client_phrases_path and client_phrases_path.exists():
+            loader.load_from_json(client_phrases_path)
 
     def _setup_menus(self, redis_url: str) -> None:
         self._close_handler = CloseCallbackHandler(

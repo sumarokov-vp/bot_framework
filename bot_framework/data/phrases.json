@@ -1,0 +1,22 @@
+{
+  "bot.start.welcome": {
+    "ru": "Добро пожаловать!",
+    "en": "Welcome!"
+  },
+  "commands.list_title": {
+    "ru": "Список команд",
+    "en": "Commands list"
+  },
+  "commands.menu_button": {
+    "ru": "Меню команд",
+    "en": "Commands menu"
+  },
+  "request_role_flow.select_role": {
+    "ru": "Выберите роль:",
+    "en": "Select your role:"
+  },
+  "request_role_flow.role_requested": {
+    "ru": "Запрос на роль отправлен",
+    "en": "Role request sent"
+  }
+}
