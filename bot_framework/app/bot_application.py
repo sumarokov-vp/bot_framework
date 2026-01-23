@@ -17,7 +17,7 @@ from bot_framework.menus import (
 )
 from bot_framework.protocols.i_callback_handler import ICallbackHandler
 from bot_framework.role_management.repos import RoleRepo, UserRepo
-from bot_framework.telegram import TelegramMessageCore
+from bot_framework.telegram import CloseCallbackHandler, TelegramMessageCore
 
 if TYPE_CHECKING:
     from telebot import TeleBot
@@ -55,6 +55,12 @@ class BotApplication:
         self._setup_menus(redis_url)
 
     def _setup_menus(self, redis_url: str) -> None:
+        self._close_handler = CloseCallbackHandler(
+            callback_answerer=self.core.callback_answerer,
+            message_deleter=self.core.message_deleter,
+        )
+        self.core.callback_handler_registry.register(self._close_handler)
+
         request_role_flow_state_storage = RedisRequestRoleFlowStateStorage(
             redis_url=redis_url,
         )
@@ -155,6 +161,10 @@ class BotApplication:
     @property
     def next_step_registrar(self) -> NextStepHandlerRegistrar:  # noqa: F821
         return self.core.next_step_registrar
+
+    @property
+    def close_handler(self) -> CloseCallbackHandler:
+        return self._close_handler
 
     def run(self) -> None:
         self.core.bot.infinity_polling()
