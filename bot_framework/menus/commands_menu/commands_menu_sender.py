@@ -12,12 +12,15 @@ class CommandsMenuSender(ICommandsMenuSender):
         message_sender: IMessageSender,
         phrase_repo: IPhraseRepo,
         title_phrase_key: str,
-        buttons: list[MenuButtonConfig],
+        buttons: list[MenuButtonConfig] | None = None,
     ) -> None:
         self.message_sender = message_sender
         self.phrase_repo = phrase_repo
         self.title_phrase_key = title_phrase_key
-        self.buttons = buttons
+        self.buttons = buttons if buttons is not None else []
+
+    def add_button(self, config: MenuButtonConfig) -> None:
+        self.buttons.append(config)
 
     def send(self, chat_id: int, language_code: str) -> None:
         text = self.phrase_repo.get_phrase(

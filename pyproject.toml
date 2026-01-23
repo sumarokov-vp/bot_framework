@@ -92,6 +92,7 @@ root_packages = ["bot_framework"]
 name = "bot_framework layers"
 type = "layers"
 layers = [
+    "bot_framework.app",
     "bot_framework.menus",
     "bot_framework.flows",
     "bot_framework.telegram",

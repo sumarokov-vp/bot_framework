@@ -22,12 +22,15 @@ class MainMenuSender(IMainMenuSender):
         message_sender: IMessageSender,
         phrase_repo: IPhraseRepo,
         welcome_phrase_key: str,
-        buttons: list[MenuButtonConfig],
+        buttons: list[MenuButtonConfig] | None = None,
     ) -> None:
         self.message_sender = message_sender
         self.phrase_repo = phrase_repo
         self.welcome_phrase_key = welcome_phrase_key
-        self.buttons = buttons
+        self.buttons = buttons if buttons is not None else []
+
+    def add_button(self, config: MenuButtonConfig) -> None:
+        self.buttons.append(config)
 
     def send(
         self,
