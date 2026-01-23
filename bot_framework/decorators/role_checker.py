@@ -5,12 +5,15 @@ from typing import Any
 from bot_framework.entities.bot_callback import BotCallback
 from bot_framework.entities.bot_message import BotMessage
 
+CallbackHandler = Callable[[Any, BotCallback], None]
+MessageHandler = Callable[[Any, BotMessage], None]
+
 
 class OperationNotAllowedError(Exception):
     pass
 
 
-def check_roles(func: Callable[..., Any]) -> Callable[..., Any]:
+def check_roles[T: CallbackHandler](func: T) -> T:
     @wraps(func)
     def wrapper(self: Any, callback: BotCallback) -> None:
         if hasattr(self, "allowed_roles") and self.allowed_roles:
@@ -34,10 +37,10 @@ def check_roles(func: Callable[..., Any]) -> Callable[..., Any]:
 
         return func(self, callback)
 
-    return wrapper
+    return wrapper  # type: ignore[return-value]
 
 
-def check_message_roles(func: Callable[..., Any]) -> Callable[..., Any]:
+def check_message_roles[M: MessageHandler](func: M) -> M:
     @wraps(func)
     def wrapper(self: Any, message: BotMessage) -> None:
         if hasattr(self, "allowed_roles") and self.allowed_roles:
@@ -60,4 +63,4 @@ def check_message_roles(func: Callable[..., Any]) -> Callable[..., Any]:
 
         return func(self, message)
 
-    return wrapper
+    return wrapper  # type: ignore[return-value]
