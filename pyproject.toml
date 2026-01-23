@@ -34,10 +34,13 @@ packages = ["bot_framework"]
 [tool.pyright]
 venv = ".venv"
 venvPath = "."
+exclude = ["stubs/", ".venv/"]
 reportUnusedVariable = false
 reportUnusedImport = false
+reportMissingImports = false
 
 [tool.ruff]
+exclude = ["stubs/"]
 lint.select = [
   "F",   # flake8
   "E",   # pycodestyle errors
@@ -68,6 +71,8 @@ lint.ignore = [
 ]
 
 [tool.mypy]
+mypy_path = "stubs"
+exclude = ["stubs/"]
 ignore_missing_imports = true
 strict = false
 disallow_subclassing_any = true
