@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bot_framework.flow_management import IFlowMessageStorage
+from bot_framework.flow_management import RedisFlowMessageStorage
 from bot_framework.flows.request_role_flow import RequestRoleFlowFactory
 from bot_framework.flows.request_role_flow.repos import (
     RedisRequestRoleFlowStateStorage,
@@ -38,9 +38,9 @@ class BotApplication:
         bot_token: str,
         database_url: str,
         redis_url: str,
-        flow_message_storage: IFlowMessageStorage | None = None,
         use_class_middlewares: bool = False,
     ) -> None:
+        flow_message_storage = RedisFlowMessageStorage(redis_url=redis_url)
         self.core = TelegramMessageCore(
             bot_token=bot_token,
             database_url=database_url,
