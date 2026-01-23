@@ -7,7 +7,7 @@ from bot_framework.flows.request_role_flow import RequestRoleFlowFactory
 from bot_framework.flows.request_role_flow.repos import (
     RedisRequestRoleFlowStateStorage,
 )
-from bot_framework.language_management.repos import PhraseRepo
+from bot_framework.language_management.providers import PhraseProvider
 from bot_framework.menus import (
     CommandsMenuSender,
     MainMenuSender,
@@ -50,7 +50,8 @@ class BotApplication:
 
         self.user_repo = UserRepo(database_url=database_url)
         self.role_repo = RoleRepo(database_url=database_url)
-        self.phrase_repo = PhraseRepo(database_url=database_url)
+        self.phrase_provider = PhraseProvider(database_url=database_url)
+        self.phrase_repo = self.phrase_provider  # обратная совместимость
 
         self._setup_menus(redis_url)
 
