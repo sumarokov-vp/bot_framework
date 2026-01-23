@@ -1,22 +1,26 @@
 from __future__ import annotations
 
-from telebot import TeleBot
+from typing import TYPE_CHECKING
+
 from telebot.types import CallbackQuery
 
 from bot_framework.entities.bot_callback import BotCallback
 from bot_framework.protocols.i_callback_handler import ICallbackHandler
 
+if TYPE_CHECKING:
+    from .telegram_message_core import TelegramMessageCore
+
 
 class CallbackHandlerRegistry:
-    def __init__(self, bot: TeleBot):
-        self.bot = bot
+    def __init__(self, core: TelegramMessageCore) -> None:
+        self._core = core
 
     def register(self, handler: ICallbackHandler) -> None:
         def wrapper(call: CallbackQuery) -> None:
             bot_callback = self._to_bot_callback(call)
             handler.handle(bot_callback)
 
-        self.bot.register_callback_query_handler(
+        self._core.bot.register_callback_query_handler(
             wrapper,
             func=lambda call: call.data and call.data.startswith(handler.prefix),
         )

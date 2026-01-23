@@ -1,4 +1,4 @@
 from .ensure_user_middleware import EnsureUserMiddleware
-from .i_middleware import IMiddleware
+from .telegram_base_middleware import TelegramBaseMiddleware
 
-__all__ = ["EnsureUserMiddleware", "IMiddleware"]
+__all__ = ["EnsureUserMiddleware", "TelegramBaseMiddleware"]

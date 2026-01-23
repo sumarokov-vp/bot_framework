@@ -31,7 +31,7 @@ class TelegramMessageSender(IMessageSender):
             msg = self._core.bot.send_message(
                 chat_id=chat_id,
                 text=text_to_send,
-                parse_mode=parse_mode.value,
+                parse_mode=self._core.convert_parse_mode(parse_mode),
                 reply_markup=reply_markup,
             )
             self._core.register_message(chat_id, msg.message_id, flow_name)

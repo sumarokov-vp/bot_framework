@@ -2,10 +2,12 @@ from telebot.types import CallbackQuery, Message, User as TelegramUser
 
 from bot_framework.entities.bot_user import BotUser
 from bot_framework.protocols import IEnsureUserExists
-from bot_framework.telegram.middleware.i_middleware import IMiddleware
+from bot_framework.telegram.middleware.telegram_base_middleware import (
+    TelegramBaseMiddleware,
+)
 
 
-class EnsureUserMiddleware(IMiddleware):
+class EnsureUserMiddleware(TelegramBaseMiddleware):
     update_types = ["message", "callback_query"]
 
     def __init__(self, ensure_user_exists: IEnsureUserExists):

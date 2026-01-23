@@ -1,13 +1,19 @@
-from telebot import TeleBot
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from telebot.types import Message
 
 from bot_framework.entities.bot_message import BotMessage, BotMessageUser
 from bot_framework.protocols.i_message_handler import IMessageHandler
 
+if TYPE_CHECKING:
+    from .telegram_message_core import TelegramMessageCore
+
 
 class NextStepHandlerRegistrar:
-    def __init__(self, bot: TeleBot):
-        self.bot = bot
+    def __init__(self, core: TelegramMessageCore) -> None:
+        self._core = core
 
     def register(
         self,
@@ -18,7 +24,7 @@ class NextStepHandlerRegistrar:
             bot_msg = self._to_bot_message(msg)
             return handler.handle(bot_msg)
 
-        self.bot.register_next_step_handler(
+        self._core.bot.register_next_step_handler(
             message.get_original(),
             wrapper,
         )

@@ -33,7 +33,7 @@ class TelegramMessageReplacer(IMessageReplacer):
                 chat_id=chat_id,
                 message_id=message_id,
                 text=text_to_send,
-                parse_mode=parse_mode.value,
+                parse_mode=self._core.convert_parse_mode(parse_mode),
                 reply_markup=reply_markup,
             )
             self._core.register_message(chat_id, message_id, flow_name)

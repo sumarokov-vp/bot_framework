@@ -1,10 +1,12 @@
 from bot_framework.protocols import (
+    IBot,
     ICallbackAnswerer,
     ICallbackHandler,
     ICallbackHandlerRegistry,
     IEnsureUserExists,
     IFlowRouter,
     IMarkdownToHtmlConverter,
+    IMessageCore,
     IMessageDeleter,
     IMessageHandler,
     IMessageHandlerRegistry,
@@ -18,6 +20,7 @@ from bot_framework.protocols import (
 from .i_markdown_escaper import IMarkdownEscaper
 
 __all__ = [
+    "IBot",
     "ICallbackAnswerer",
     "ICallbackHandler",
     "ICallbackHandlerRegistry",
@@ -25,6 +28,7 @@ __all__ = [
     "IFlowRouter",
     "IMarkdownEscaper",
     "IMarkdownToHtmlConverter",
+    "IMessageCore",
     "IMessageDeleter",
     "IMessageHandler",
     "IMessageHandlerRegistry",

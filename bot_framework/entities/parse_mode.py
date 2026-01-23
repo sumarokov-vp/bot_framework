@@ -3,4 +3,5 @@ from enum import StrEnum
 
 class ParseMode(StrEnum):
     HTML = "HTML"
-    MARKDOWN = "MarkdownV2"
+    MARKDOWN = "Markdown"
+    PLAIN = "Plain"

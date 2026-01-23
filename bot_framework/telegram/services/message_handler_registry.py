@@ -1,15 +1,20 @@
-from collections.abc import Callable
+from __future__ import annotations
 
-from telebot import TeleBot
+from collections.abc import Callable
+from typing import TYPE_CHECKING
+
 from telebot.types import Message
 
 from bot_framework.entities.bot_message import BotMessage, BotMessageUser
 from bot_framework.protocols.i_message_handler import IMessageHandler
 
+if TYPE_CHECKING:
+    from .telegram_message_core import TelegramMessageCore
+
 
 class MessageHandlerRegistry:
-    def __init__(self, bot: TeleBot):
-        self.bot = bot
+    def __init__(self, core: TelegramMessageCore) -> None:
+        self._core = core
 
     def register(
         self,
@@ -22,7 +27,7 @@ class MessageHandlerRegistry:
             bot_message = self._to_bot_message(message)
             return handler.handle(bot_message)
 
-        self.bot.register_message_handler(
+        self._core.bot.register_message_handler(
             callback=wrapper,
             commands=commands,
             content_types=content_types,
