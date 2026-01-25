@@ -9,6 +9,7 @@ from .telegram_message_core import TelegramMessageCore
 from .telegram_message_deleter import TelegramMessageDeleter
 from .telegram_message_replacer import TelegramMessageReplacer
 from .telegram_message_sender import TelegramMessageSender
+from .telegram_message_service import TelegramMessageService
 from .telegram_notify_replacer import TelegramNotifyReplacer
 
 __all__ = [
@@ -23,5 +24,6 @@ __all__ = [
     "TelegramMessageDeleter",
     "TelegramMessageReplacer",
     "TelegramMessageSender",
+    "TelegramMessageService",
     "TelegramNotifyReplacer",
 ]

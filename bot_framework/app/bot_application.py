@@ -35,6 +35,7 @@ if TYPE_CHECKING:
         TelegramMessageDeleter,
         TelegramMessageReplacer,
         TelegramMessageSender,
+        TelegramMessageService,
     )
 
 
@@ -245,6 +246,10 @@ class BotApplication:
     @property
     def message_deleter(self) -> TelegramMessageDeleter:  # noqa: F821
         return self.core.message_deleter
+
+    @property
+    def message_service(self) -> TelegramMessageService:  # noqa: F821
+        return self.core.message_service
 
     @property
     def callback_handler_registry(self) -> CallbackHandlerRegistry:  # noqa: F821

@@ -27,17 +27,74 @@ pip install bot-framework[all]
 ## Quick Start
 
 ```python
-from bot_framework import Button, Keyboard, IMessageSender
-from bot_framework.telegram import TelegramMessageSender
+from bot_framework import Button, Keyboard
+from bot_framework.app import BotApplication
 
-# Create keyboard
+app = BotApplication(
+    bot_token="YOUR_BOT_TOKEN",
+    database_url="postgres://user:pass@localhost/dbname",
+    redis_url="redis://localhost:6379/0",
+)
+
+# Use unified message service
+message_service = app.message_service
+
 keyboard = Keyboard(rows=[
     [Button(text="Option 1", callback_data="opt1")],
     [Button(text="Option 2", callback_data="opt2")],
 ])
 
-# Send message (implement IMessageSender or use TelegramMessageSender)
-sender.send(chat_id=123, text="Choose an option:", keyboard=keyboard)
+# Send new message
+message_service.send(chat_id=123, text="Choose an option:", keyboard=keyboard)
+
+# Replace existing message
+message_service.replace(chat_id=123, message_id=456, text="Updated text")
+
+# Delete message
+message_service.delete(chat_id=123, message_id=456)
+```
+
+## Message Services
+
+Bot Framework provides a unified `TelegramMessageService` that combines all message operations:
+
+| Method | Description |
+|--------|-------------|
+| `send()` | Send a new message |
+| `send_markdown_as_html()` | Send markdown converted to HTML |
+| `send_document()` | Send a file |
+| `replace()` | Edit existing message |
+| `delete()` | Delete message |
+| `notify_replace()` | Delete old message and send new one |
+
+### Using in your handlers
+
+Use `IMessageService` protocol for dependency injection:
+
+```python
+from bot_framework.protocols.i_message_service import IMessageService
+
+class MyHandler:
+    def __init__(self, message_service: IMessageService) -> None:
+        self.message_service = message_service
+
+    def handle(self, chat_id: int, message_id: int) -> None:
+        # Switch between send/replace by changing method name only
+        self.message_service.replace(
+            chat_id=chat_id,
+            message_id=message_id,
+            text="Updated!",
+        )
+```
+
+### Legacy services (still available)
+
+Individual services are still available for backwards compatibility:
+
+```python
+message_sender = app.message_sender    # IMessageSender
+message_replacer = app.message_replacer  # IMessageReplacer
+message_deleter = app.message_deleter   # IMessageDeleter
 ```
 
 ## Bot Commands

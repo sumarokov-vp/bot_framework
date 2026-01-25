@@ -24,6 +24,7 @@ if TYPE_CHECKING:
     from .telegram_message_deleter import TelegramMessageDeleter
     from .telegram_message_replacer import TelegramMessageReplacer
     from .telegram_message_sender import TelegramMessageSender
+    from .telegram_message_service import TelegramMessageService
 
 TELEGRAM_PARSE_MODE_MAP: dict[ParseMode, str | None] = {
     ParseMode.HTML: "HTML",
@@ -71,10 +72,24 @@ class TelegramMessageCore:
         from .telegram_message_deleter import TelegramMessageDeleter
         from .telegram_message_replacer import TelegramMessageReplacer
         from .telegram_message_sender import TelegramMessageSender
+        from .telegram_message_service import TelegramMessageService
+        from .telegram_notify_replacer import TelegramNotifyReplacer
 
         self.message_sender: TelegramMessageSender = TelegramMessageSender(self)
         self.message_replacer: TelegramMessageReplacer = TelegramMessageReplacer(self)
         self.message_deleter: TelegramMessageDeleter = TelegramMessageDeleter(self)
+
+        notify_replacer = TelegramNotifyReplacer(
+            sender=self.message_sender,
+            deleter=self.message_deleter,
+        )
+        self.message_service: TelegramMessageService = TelegramMessageService(
+            sender=self.message_sender,
+            replacer=self.message_replacer,
+            deleter=self.message_deleter,
+            notify_replacer=notify_replacer,
+        )
+
         self.callback_handler_registry: CallbackHandlerRegistry = (
             CallbackHandlerRegistry(self)
         )
