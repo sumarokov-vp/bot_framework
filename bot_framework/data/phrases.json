@@ -19,6 +19,10 @@
     "ru": "Запрос на роль отправлен",
     "en": "Role request sent"
   },
+  "request_role.select_title": {
+    "ru": "Выберите роль:",
+    "en": "Select your role:"
+  },
   "language.select_title": {
     "ru": "Выберите язык:",
     "en": "Select your language:"
