@@ -9,6 +9,7 @@ from bot_framework.flows.request_role_flow.repos import (
     RedisRequestRoleFlowStateStorage,
 )
 from bot_framework.language_management.loaders import LanguageLoader, PhraseLoader
+from bot_framework.role_management.loaders import RoleLoader
 from bot_framework.language_management.providers import RedisPhraseProvider
 from bot_framework.menus import (
     CommandsMenuSender,
@@ -42,8 +43,16 @@ class BotApplication:
         redis_url: str,
         phrases_json_path: Path | None = None,
         languages_json_path: Path | None = None,
+        roles_json_path: Path | None = None,
         use_class_middlewares: bool = False,
+        auto_migrate: bool = True,
     ) -> None:
+        if auto_migrate:
+            from bot_framework.migrations import apply_migrations
+
+            apply_migrations(database_url)
+
+        self._load_roles(database_url, roles_json_path)
         self._load_languages(redis_url, languages_json_path)
         self._load_phrases(redis_url, phrases_json_path)
 
@@ -91,6 +100,21 @@ class BotApplication:
 
         if client_phrases_path and client_phrases_path.exists():
             loader.load_from_json(client_phrases_path)
+
+    def _load_roles(
+        self,
+        database_url: str,
+        client_roles_path: Path | None,
+    ) -> None:
+        loader = RoleLoader(database_url=database_url)
+        data_dir = Path(__file__).parent.parent / "data"
+
+        base_path = data_dir / "roles.json"
+        if base_path.exists():
+            loader.load_from_json(base_path)
+
+        if client_roles_path and client_roles_path.exists():
+            loader.load_from_json(client_roles_path)
 
     def _setup_menus(self, redis_url: str) -> None:
         self._close_handler = CloseCallbackHandler(

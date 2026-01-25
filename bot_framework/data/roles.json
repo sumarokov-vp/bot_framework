@@ -1,0 +1,6 @@
+{
+  "roles": [
+    {"name": "user", "description": "Default role for all users"},
+    {"name": "supervisors", "description": "Role approvers"}
+  ]
+}
