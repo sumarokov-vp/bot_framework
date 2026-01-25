@@ -10,6 +10,7 @@ from bot_framework.flows.request_role_flow.repos import (
 )
 from bot_framework.language_management.loaders import LanguageLoader, PhraseLoader
 from bot_framework.language_management.repos import LanguageRepo
+from bot_framework.language_management.validators import MissingTranslationsValidator
 from bot_framework.role_management.loaders import RoleLoader
 from bot_framework.language_management.providers import RedisPhraseProvider
 from bot_framework.menus import (
@@ -57,6 +58,7 @@ class BotApplication:
         self._load_roles(database_url, roles_json_path)
         self._load_languages(redis_url, database_url, languages_json_path)
         self._load_phrases(redis_url, phrases_json_path)
+        self._validate_translations(languages_json_path, phrases_json_path)
 
         flow_message_storage = RedisFlowMessageStorage(redis_url=redis_url)
         self.core = TelegramMessageCore(
@@ -119,6 +121,20 @@ class BotApplication:
 
         if client_roles_path and client_roles_path.exists():
             loader.load_from_json(client_roles_path)
+
+    def _validate_translations(
+        self,
+        client_languages_path: Path | None,
+        client_phrases_path: Path | None,
+    ) -> None:
+        data_dir = Path(__file__).parent.parent / "data"
+        validator = MissingTranslationsValidator()
+        validator.validate_and_log_missing(
+            library_languages_path=data_dir / "languages.json",
+            library_phrases_path=data_dir / "phrases.json",
+            client_languages_path=client_languages_path,
+            client_phrases_path=client_phrases_path,
+        )
 
     def _setup_menus(self, redis_url: str) -> None:
         self._close_handler = CloseCallbackHandler(
