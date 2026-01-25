@@ -24,3 +24,9 @@ class IUserRepo(
         self,
         role_name: str,
     ) -> list[UserT]: ...
+
+    def update_language(
+        self,
+        user_id: int,
+        language_code: str,
+    ) -> None: ...

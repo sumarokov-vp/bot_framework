@@ -37,10 +37,6 @@ class RoleSelectionHandler:
     def handle(self, callback: BotCallback) -> None:
         self.callback_answerer.answer(callback_query_id=callback.id)
 
-        if not callback.user_id:
-            raise ValueError("callback.user_id is required but was None")
-        if not callback.message_chat_id:
-            raise ValueError("callback.message_chat_id is required but was None")
         if not callback.data:
             raise ValueError("callback.data is required but was None")
 
@@ -49,15 +45,14 @@ class RoleSelectionHandler:
             raise ValueError(f"Invalid callback data format: {callback.data}")
 
         role_id = int(parts[1])
-        telegram_id = callback.user_id
-        language_code = callback.user_language_code or "en"
 
-        self.state_storage.save_selected_role(telegram_id=telegram_id, role_id=role_id)
+        requester = self.user_repo.get_by_id(id=callback.user_id)
+
+        self.state_storage.save_selected_role(telegram_id=requester.id, role_id=role_id)
 
         role = self.role_repo.get_by_id(id=role_id)
-        requester = self.user_repo.get_by_id(id=telegram_id)
 
-        user_roles = self.role_repo.get_user_roles(user_id=telegram_id)
+        user_roles = self.role_repo.get_user_roles(user_id=requester.id)
         if any(r.id == role_id for r in user_roles):
             phrase_key = "request_role.already_has_role"
         else:
@@ -69,8 +64,8 @@ class RoleSelectionHandler:
 
         text = self.phrase_repo.get_phrase(
             key=phrase_key,
-            language_code=language_code,
+            language_code=requester.language_code,
         )
-        self.message_sender.send(chat_id=callback.message_chat_id, text=text)
+        self.message_sender.send(chat_id=requester.id, text=text)
 
-        self.state_storage.clear_state(telegram_id=telegram_id)
+        self.state_storage.clear_state(telegram_id=requester.id)

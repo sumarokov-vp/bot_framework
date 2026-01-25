@@ -1,3 +1,4 @@
+from bot_framework.entities.user import User
 from bot_framework.language_management.repos.protocols.i_phrase_repo import IPhraseRepo
 from bot_framework.protocols.i_message_sender import IMessageSender
 from bot_framework.role_management.repos.protocols.i_role_repo import IRoleRepo
@@ -14,17 +15,12 @@ class RoleAssigner:
         self.phrase_repo = phrase_repo
         self.role_repo = role_repo
 
-    def assign_and_notify(
-        self,
-        user_id: int,
-        role_id: int,
-        language_code: str,
-    ) -> None:
-        self.role_repo.assign_role(user_id=user_id, role_id=role_id)
+    def assign_and_notify(self, user: User, role_id: int) -> None:
+        self.role_repo.assign_role(user_id=user.id, role_id=role_id)
 
         text = self.phrase_repo.get_phrase(
             key="request_role.approved",
-            language_code=language_code,
+            language_code=user.language_code,
         )
 
-        self.message_sender.send(chat_id=user_id, text=text)
+        self.message_sender.send(chat_id=user.id, text=text)

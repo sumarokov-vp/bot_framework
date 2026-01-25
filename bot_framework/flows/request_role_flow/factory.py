@@ -55,7 +55,6 @@ class RequestRoleFlowFactory:
         if self._approve_handler is None:
             self._approve_handler = ApproveRoleHandler(
                 callback_answerer=self.callback_answerer,
-                role_repo=self.role_repo,
                 user_repo=self.user_repo,
                 role_assigner=RoleAssigner(
                     message_sender=self.message_sender,
@@ -69,7 +68,6 @@ class RequestRoleFlowFactory:
         if self._reject_handler is None:
             self._reject_handler = RejectRoleHandler(
                 callback_answerer=self.callback_answerer,
-                role_repo=self.role_repo,
                 user_repo=self.user_repo,
                 role_rejection_notifier=RoleRejectionNotifier(
                     message_sender=self.message_sender,
@@ -112,6 +110,7 @@ class RequestRoleFlowFactory:
                     role_repo=self.role_repo,
                     role_selection_handler_prefix=role_selection_handler.prefix,
                 ),
+                user_repo=self.user_repo,
             )
         return self._show_roles_handler
 
@@ -138,7 +137,10 @@ class RequestRoleFlowFactory:
         callback_registry.register(self._get_reject_handler())
 
         router = self.create_router()
-        command_handler = RequestRoleCommandHandler(request_role_flow_router=router)
+        command_handler = RequestRoleCommandHandler(
+            request_role_flow_router=router,
+            user_repo=self.user_repo,
+        )
         message_registry.register(
             handler=command_handler,
             commands=["request_role"],

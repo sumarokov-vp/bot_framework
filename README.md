@@ -40,6 +40,18 @@ keyboard = Keyboard(rows=[
 sender.send(chat_id=123, text="Choose an option:", keyboard=keyboard)
 ```
 
+## Bot Commands
+
+Set up bot commands in BotFather using `/setcommands`. Copy and paste the following:
+
+```
+start - Start the bot
+request_role - Request a role
+language - Change language
+```
+
+This enables command autocompletion in Telegram when users type `/`.
+
 ## Database Migrations
 
 Bot Framework includes built-in database migrations using yoyo-migrations. Migrations are applied automatically when creating a `BotApplication` instance.

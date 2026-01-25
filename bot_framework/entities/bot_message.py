@@ -7,7 +7,6 @@ class BotMessageUser(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    language_code: str | None = None
 
 
 class BotMessage(BaseModel):

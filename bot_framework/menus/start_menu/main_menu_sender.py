@@ -1,5 +1,6 @@
 from bot_framework.entities.button import Button
 from bot_framework.entities.keyboard import Keyboard
+from bot_framework.entities.user import User
 from bot_framework.language_management.repos.protocols.i_phrase_repo import IPhraseRepo
 from bot_framework.menus.start_menu.i_main_menu_sender import IMainMenuSender
 from bot_framework.protocols.i_callback_handler import ICallbackHandler
@@ -32,14 +33,10 @@ class MainMenuSender(IMainMenuSender):
     def add_button(self, config: MenuButtonConfig) -> None:
         self.buttons.append(config)
 
-    def send(
-        self,
-        chat_id: int,
-        language_code: str,
-    ) -> None:
+    def send(self, user: User) -> None:
         text = self.phrase_repo.get_phrase(
             key=self.welcome_phrase_key,
-            language_code=language_code,
+            language_code=user.language_code,
         )
 
         rows = []
@@ -47,7 +44,7 @@ class MainMenuSender(IMainMenuSender):
             button = Button(
                 text=self.phrase_repo.get_phrase(
                     key=button_config.phrase_key,
-                    language_code=language_code,
+                    language_code=user.language_code,
                 ),
                 callback_data=button_config.handler.prefix,
             )
@@ -56,7 +53,7 @@ class MainMenuSender(IMainMenuSender):
         keyboard = Keyboard(rows=rows)
 
         self.message_sender.send(
-            chat_id=chat_id,
+            chat_id=user.id,
             text=text,
             keyboard=keyboard,
         )

@@ -9,6 +9,13 @@ from bot_framework.menus.commands_menu import (
     ICommandsMenuSender,
     ShowCommandsHandler,
 )
+from bot_framework.menus.language_menu import (
+    ILanguageMenuSender,
+    LanguageMenuFactory,
+    LanguageMenuSender,
+    SelectLanguageHandler,
+    ShowLanguageMenuHandler,
+)
 
 __all__ = [
     # Common
@@ -21,4 +28,10 @@ __all__ = [
     "CommandsMenuSender",
     "ICommandsMenuSender",
     "ShowCommandsHandler",
+    # Language menu
+    "ILanguageMenuSender",
+    "LanguageMenuFactory",
+    "LanguageMenuSender",
+    "SelectLanguageHandler",
+    "ShowLanguageMenuHandler",
 ]

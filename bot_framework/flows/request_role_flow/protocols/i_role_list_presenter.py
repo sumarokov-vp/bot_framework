@@ -1,5 +1,7 @@
 from typing import Protocol
 
+from bot_framework.entities.user import User
+
 
 class IRoleListPresenter(Protocol):
-    def present(self, chat_id: int, user_id: int, language_code: str) -> None: ...
+    def present(self, user: User) -> None: ...

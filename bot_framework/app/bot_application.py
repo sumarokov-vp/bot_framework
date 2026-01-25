@@ -151,6 +151,7 @@ class BotApplication:
         self._show_commands_handler = ShowCommandsHandler(
             callback_answerer=self.core.callback_answerer,
             commands_menu_sender=self._commands_menu_sender,
+            user_repo=self.user_repo,
         )
         self.core.callback_handler_registry.register(self._show_commands_handler)
 

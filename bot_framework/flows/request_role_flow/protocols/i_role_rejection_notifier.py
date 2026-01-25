@@ -1,9 +1,7 @@
 from typing import Protocol
 
+from bot_framework.entities.user import User
+
 
 class IRoleRejectionNotifier(Protocol):
-    def notify(
-        self,
-        user_id: int,
-        language_code: str,
-    ) -> None: ...
+    def notify(self, user: User) -> None: ...

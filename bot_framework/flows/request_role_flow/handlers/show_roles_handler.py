@@ -3,6 +3,7 @@ from uuid import uuid4
 from bot_framework.entities.bot_callback import BotCallback
 from bot_framework.flows.request_role_flow.protocols import IRoleListPresenter
 from bot_framework.protocols.i_callback_answerer import ICallbackAnswerer
+from bot_framework.role_management.repos.protocols.i_user_repo import IUserRepo
 
 
 class ShowRolesHandler:
@@ -10,21 +11,16 @@ class ShowRolesHandler:
         self,
         callback_answerer: ICallbackAnswerer,
         role_list_presenter: IRoleListPresenter,
+        user_repo: IUserRepo,
     ) -> None:
         self.callback_answerer = callback_answerer
         self.role_list_presenter = role_list_presenter
+        self.user_repo = user_repo
         self.prefix = uuid4().hex
         self.allowed_roles: set[str] | None = None
 
     def handle(self, callback: BotCallback) -> None:
         self.callback_answerer.answer(callback_query_id=callback.id)
 
-        if not callback.message_chat_id:
-            raise ValueError("callback.message_chat_id is required but was None")
-
-        language_code = callback.user_language_code or "en"
-        self.role_list_presenter.present(
-            chat_id=callback.message_chat_id,
-            user_id=callback.user_id,
-            language_code=language_code,
-        )
+        user = self.user_repo.get_by_id(id=callback.user_id)
+        self.role_list_presenter.present(user)

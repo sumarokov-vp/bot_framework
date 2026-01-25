@@ -11,7 +11,6 @@ class BotCallback(BaseModel):
     data: str | None
     message_id: int | None
     message_chat_id: int | None
-    user_language_code: str | None = None
     _original: Any = PrivateAttr(default=None)
 
     def get_original(self) -> Any:

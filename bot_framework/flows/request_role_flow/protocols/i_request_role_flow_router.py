@@ -1,7 +1,7 @@
 from typing import Protocol
 
-from bot_framework.entities.bot_message import BotMessageUser
+from bot_framework.entities.user import User
 
 
 class IRequestRoleFlowRouter(Protocol):
-    def start(self, user: BotMessageUser, chat_id: int) -> None: ...
+    def start(self, user: User) -> None: ...

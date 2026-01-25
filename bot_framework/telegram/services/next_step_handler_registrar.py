@@ -35,7 +35,6 @@ class NextStepHandlerRegistrar:
 
         from_user = BotMessageUser(
             id=message.from_user.id,
-            language_code=message.from_user.language_code,
         )
 
         bot_message = BotMessage(

@@ -173,3 +173,22 @@ class UserRepo(IUserRepo):
                         "timestamp": timestamp,
                     },
                 )
+
+    def update_language(
+        self,
+        user_id: int,
+        language_code: str,
+    ) -> None:
+        with psycopg.connect(self.database_url) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users
+                    SET language_code = %(language_code)s
+                    WHERE id = %(user_id)s
+                    """,
+                    {
+                        "user_id": user_id,
+                        "language_code": language_code,
+                    },
+                )

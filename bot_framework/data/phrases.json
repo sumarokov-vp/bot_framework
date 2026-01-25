@@ -18,5 +18,17 @@
   "request_role_flow.role_requested": {
     "ru": "Запрос на роль отправлен",
     "en": "Role request sent"
+  },
+  "language.select_title": {
+    "ru": "Выберите язык:",
+    "en": "Select your language:"
+  },
+  "language.changed": {
+    "ru": "Язык успешно изменён!",
+    "en": "Language changed successfully!"
+  },
+  "language.menu_button": {
+    "ru": "Язык",
+    "en": "Language"
   }
 }

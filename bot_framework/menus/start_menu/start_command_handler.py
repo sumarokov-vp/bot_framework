@@ -21,30 +21,15 @@ class StartCommandHandler(IMessageHandler):
         self.main_menu_sender = main_menu_sender
         self.request_role_flow_router = request_role_flow_router
 
-    def handle(
-        self,
-        message: BotMessage,
-    ) -> None:
+    def handle(self, message: BotMessage) -> None:
         if not message.from_user:
             raise ValueError("message.from_user is required but was None")
 
-        telegram_id = message.from_user.id
+        user = self.user_repo.get_by_id(id=message.from_user.id)
 
-        user = self.user_repo.find_by_id(id=telegram_id)
-        if not user:
-            self.request_role_flow_router.start(
-                user=message.from_user,
-                chat_id=message.chat_id,
-            )
-            return
-
-        user_roles = self.role_repo.get_user_roles(user_id=telegram_id)
+        user_roles = self.role_repo.get_user_roles(user_id=user.id)
         if not user_roles:
-            self.request_role_flow_router.start(
-                user=message.from_user,
-                chat_id=message.chat_id,
-            )
+            self.request_role_flow_router.start(user)
             return
 
-        language_code = message.from_user.language_code or "en"
-        self.main_menu_sender.send(message.chat_id, language_code)
+        self.main_menu_sender.send(user)

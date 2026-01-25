@@ -41,7 +41,6 @@ class CallbackHandlerRegistry:
             data=call.data,
             message_id=message_id,
             message_chat_id=message_chat_id,
-            user_language_code=call.from_user.language_code,
         )
         bot_callback.set_original(call)
         return bot_callback
