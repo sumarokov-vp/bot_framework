@@ -187,6 +187,7 @@ class BotApplication:
         language_menu_factory = LanguageMenuFactory(
             callback_answerer=self.core.callback_answerer,
             message_sender=self.core.message_sender,
+            message_replacer=self.core.message_replacer,
             phrase_repo=self.phrase_repo,
             language_repo=LanguageRepo(database_url=self._database_url),
             user_repo=self.user_repo,

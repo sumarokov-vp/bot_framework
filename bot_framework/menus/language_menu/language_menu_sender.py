@@ -6,6 +6,7 @@ from bot_framework.language_management.repos.protocols.i_language_repo import (
 )
 from bot_framework.language_management.repos.protocols.i_phrase_repo import IPhraseRepo
 from bot_framework.menus.language_menu.i_language_menu_sender import ILanguageMenuSender
+from bot_framework.protocols.i_message_replacer import IMessageReplacer
 from bot_framework.protocols.i_message_sender import IMessageSender
 
 
@@ -13,21 +14,18 @@ class LanguageMenuSender(ILanguageMenuSender):
     def __init__(
         self,
         message_sender: IMessageSender,
+        message_replacer: IMessageReplacer,
         phrase_repo: IPhraseRepo,
         language_repo: ILanguageRepo,
         select_language_handler_prefix: str,
     ) -> None:
         self.message_sender = message_sender
+        self.message_replacer = message_replacer
         self.phrase_repo = phrase_repo
         self.language_repo = language_repo
         self.select_language_handler_prefix = select_language_handler_prefix
 
-    def send(self, user: User) -> None:
-        text = self.phrase_repo.get_phrase(
-            key="language.select_title",
-            language_code=user.language_code,
-        )
-
+    def _build_keyboard(self, user: User) -> Keyboard:
         languages = self.language_repo.get_all()
         rows = []
         for lang in languages:
@@ -41,6 +39,25 @@ class LanguageMenuSender(ILanguageMenuSender):
                     )
                 ]
             )
+        return Keyboard(rows=rows)
 
-        keyboard = Keyboard(rows=rows)
+    def send(self, user: User) -> None:
+        text = self.phrase_repo.get_phrase(
+            key="language.select_title",
+            language_code=user.language_code,
+        )
+        keyboard = self._build_keyboard(user)
         self.message_sender.send(chat_id=user.id, text=text, keyboard=keyboard)
+
+    def replace(self, user: User, message_id: int) -> None:
+        text = self.phrase_repo.get_phrase(
+            key="language.select_title",
+            language_code=user.language_code,
+        )
+        keyboard = self._build_keyboard(user)
+        self.message_replacer.replace(
+            chat_id=user.id,
+            message_id=message_id,
+            text=text,
+            keyboard=keyboard,
+        )

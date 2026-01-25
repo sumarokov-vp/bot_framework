@@ -17,6 +17,7 @@ from bot_framework.protocols.i_callback_handler_registry import (
     ICallbackHandlerRegistry,
 )
 from bot_framework.protocols.i_message_handler_registry import IMessageHandlerRegistry
+from bot_framework.protocols.i_message_replacer import IMessageReplacer
 from bot_framework.protocols.i_message_sender import IMessageSender
 from bot_framework.role_management.repos.protocols.i_user_repo import IUserRepo
 
@@ -26,16 +27,19 @@ class LanguageMenuFactory:
         self,
         callback_answerer: ICallbackAnswerer,
         message_sender: IMessageSender,
+        message_replacer: IMessageReplacer,
         phrase_repo: IPhraseRepo,
         language_repo: ILanguageRepo,
         user_repo: IUserRepo,
     ) -> None:
         self.callback_answerer = callback_answerer
         self.message_sender = message_sender
+        self.message_replacer = message_replacer
         self.phrase_repo = phrase_repo
         self.language_repo = language_repo
         self.user_repo = user_repo
 
+        self._language_menu_sender: LanguageMenuSender | None = None
         self._show_language_menu_handler: ShowLanguageMenuHandler | None = None
         self._select_language_handler: SelectLanguageHandler | None = None
         self._language_command_handler: LanguageCommandHandler | None = None
@@ -44,33 +48,36 @@ class LanguageMenuFactory:
         if self._select_language_handler is None:
             self._select_language_handler = SelectLanguageHandler(
                 callback_answerer=self.callback_answerer,
-                message_sender=self.message_sender,
-                phrase_repo=self.phrase_repo,
                 user_repo=self.user_repo,
             )
         return self._select_language_handler
 
+    def _get_language_menu_sender(self) -> LanguageMenuSender:
+        if self._language_menu_sender is None:
+            select_language_handler = self._get_select_language_handler()
+            self._language_menu_sender = LanguageMenuSender(
+                message_sender=self.message_sender,
+                message_replacer=self.message_replacer,
+                phrase_repo=self.phrase_repo,
+                language_repo=self.language_repo,
+                select_language_handler_prefix=select_language_handler.prefix,
+            )
+            select_language_handler.set_language_menu_sender(self._language_menu_sender)
+        return self._language_menu_sender
+
     def _get_show_language_menu_handler(self) -> ShowLanguageMenuHandler:
         if self._show_language_menu_handler is None:
-            select_language_handler = self._get_select_language_handler()
-
             self._show_language_menu_handler = ShowLanguageMenuHandler(
                 callback_answerer=self.callback_answerer,
-                language_menu_sender=LanguageMenuSender(
-                    message_sender=self.message_sender,
-                    phrase_repo=self.phrase_repo,
-                    language_repo=self.language_repo,
-                    select_language_handler_prefix=select_language_handler.prefix,
-                ),
+                language_menu_sender=self._get_language_menu_sender(),
                 user_repo=self.user_repo,
             )
         return self._show_language_menu_handler
 
     def _get_language_command_handler(self) -> LanguageCommandHandler:
         if self._language_command_handler is None:
-            show_handler = self._get_show_language_menu_handler()
             self._language_command_handler = LanguageCommandHandler(
-                language_menu_sender=show_handler.language_menu_sender,
+                language_menu_sender=self._get_language_menu_sender(),
                 user_repo=self.user_repo,
             )
         return self._language_command_handler
