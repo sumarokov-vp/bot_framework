@@ -55,7 +55,7 @@ class BotApplication:
             apply_migrations(database_url)
 
         self._load_roles(database_url, roles_json_path)
-        self._load_languages(redis_url, languages_json_path)
+        self._load_languages(redis_url, database_url, languages_json_path)
         self._load_phrases(redis_url, phrases_json_path)
 
         flow_message_storage = RedisFlowMessageStorage(redis_url=redis_url)
@@ -77,9 +77,10 @@ class BotApplication:
     def _load_languages(
         self,
         redis_url: str,
+        database_url: str,
         client_languages_path: Path | None,
     ) -> None:
-        loader = LanguageLoader(redis_url=redis_url)
+        loader = LanguageLoader(redis_url=redis_url, database_url=database_url)
         data_dir = Path(__file__).parent.parent / "data"
 
         base_path = data_dir / "languages.json"
