@@ -9,6 +9,7 @@ from bot_framework.flows.request_role_flow.repos import (
     RedisRequestRoleFlowStateStorage,
 )
 from bot_framework.language_management.loaders import LanguageLoader, PhraseLoader
+from bot_framework.language_management.repos import LanguageRepo
 from bot_framework.role_management.loaders import RoleLoader
 from bot_framework.language_management.providers import RedisPhraseProvider
 from bot_framework.menus import (
@@ -18,6 +19,7 @@ from bot_framework.menus import (
     ShowCommandsHandler,
     StartCommandHandler,
 )
+from bot_framework.menus.language_menu import LanguageMenuFactory
 from bot_framework.protocols.i_callback_handler import ICallbackHandler
 from bot_framework.role_management.repos import RoleRepo, UserRepo
 from bot_framework.telegram import CloseCallbackHandler, TelegramMessageCore
@@ -64,6 +66,7 @@ class BotApplication:
             use_class_middlewares=use_class_middlewares,
         )
 
+        self._database_url = database_url
         self.user_repo = UserRepo(database_url=database_url)
         self.role_repo = RoleRepo(database_url=database_url)
         self.phrase_provider = RedisPhraseProvider(redis_url=redis_url)
@@ -178,6 +181,18 @@ class BotApplication:
             handler=start_command_handler,
             commands=["start"],
             content_types=["text"],
+        )
+
+        language_menu_factory = LanguageMenuFactory(
+            callback_answerer=self.core.callback_answerer,
+            message_sender=self.core.message_sender,
+            phrase_repo=self.phrase_repo,
+            language_repo=LanguageRepo(database_url=self._database_url),
+            user_repo=self.user_repo,
+        )
+        language_menu_factory.register_handlers(
+            callback_registry=self.core.callback_handler_registry,
+            message_registry=self.core.message_handler_registry,
         )
 
     def add_main_menu_button(

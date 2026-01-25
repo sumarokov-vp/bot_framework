@@ -2,6 +2,9 @@ from bot_framework.language_management.repos.protocols.i_language_repo import (
     ILanguageRepo,
 )
 from bot_framework.language_management.repos.protocols.i_phrase_repo import IPhraseRepo
+from bot_framework.menus.language_menu.language_command_handler import (
+    LanguageCommandHandler,
+)
 from bot_framework.menus.language_menu.language_menu_sender import LanguageMenuSender
 from bot_framework.menus.language_menu.select_language_handler import (
     SelectLanguageHandler,
@@ -13,6 +16,7 @@ from bot_framework.protocols.i_callback_answerer import ICallbackAnswerer
 from bot_framework.protocols.i_callback_handler_registry import (
     ICallbackHandlerRegistry,
 )
+from bot_framework.protocols.i_message_handler_registry import IMessageHandlerRegistry
 from bot_framework.protocols.i_message_sender import IMessageSender
 from bot_framework.role_management.repos.protocols.i_user_repo import IUserRepo
 
@@ -34,6 +38,7 @@ class LanguageMenuFactory:
 
         self._show_language_menu_handler: ShowLanguageMenuHandler | None = None
         self._select_language_handler: SelectLanguageHandler | None = None
+        self._language_command_handler: LanguageCommandHandler | None = None
 
     def _get_select_language_handler(self) -> SelectLanguageHandler:
         if self._select_language_handler is None:
@@ -61,12 +66,32 @@ class LanguageMenuFactory:
             )
         return self._show_language_menu_handler
 
+    def _get_language_command_handler(self) -> LanguageCommandHandler:
+        if self._language_command_handler is None:
+            show_handler = self._get_show_language_menu_handler()
+            self._language_command_handler = LanguageCommandHandler(
+                language_menu_sender=show_handler.language_menu_sender,
+                user_repo=self.user_repo,
+            )
+        return self._language_command_handler
+
     def get_show_language_menu_handler(self) -> ShowLanguageMenuHandler:
         return self._get_show_language_menu_handler()
+
+    def get_language_command_handler(self) -> LanguageCommandHandler:
+        return self._get_language_command_handler()
 
     def register_handlers(
         self,
         callback_registry: ICallbackHandlerRegistry,
+        message_registry: IMessageHandlerRegistry | None = None,
     ) -> None:
         callback_registry.register(self._get_show_language_menu_handler())
         callback_registry.register(self._get_select_language_handler())
+
+        if message_registry is not None:
+            message_registry.register(
+                handler=self._get_language_command_handler(),
+                commands=["language"],
+                content_types=["text"],
+            )
