@@ -31,10 +31,6 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["bot_framework"]
 
-[tool.hatch.build.targets.wheel.force-include]
-"bot_framework/data" = "bot_framework/data"
-"bot_framework/migrations/sql" = "bot_framework/migrations/sql"
-
 [tool.pyright]
 venv = ".venv"
 venvPath = "."
