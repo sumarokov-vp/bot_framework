@@ -1,12 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
 
 from bot_framework.entities.user import User
 
-TState = TypeVar("TState")
 
-
-class BaseStep(ABC, Generic[TState]):
+class BaseStep[TState](ABC):
     name: str
 
     @abstractmethod

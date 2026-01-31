@@ -1,15 +1,12 @@
 from collections.abc import Callable
-from typing import Generic, TypeVar
 
 from bot_framework.entities import BotMessage
 from bot_framework.entities.user import User
 from bot_framework.step_flow.protocols.i_step import IStep
 from bot_framework.step_flow.protocols.i_step_state_storage import IStepStateStorage
 
-TState = TypeVar("TState")
 
-
-class StepFlowRouter(Generic[TState]):
+class StepFlowRouter[TState]:
     def __init__(
         self,
         flow_name: str,
