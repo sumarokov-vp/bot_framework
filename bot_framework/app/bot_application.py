@@ -14,10 +14,8 @@ from bot_framework.language_management.validators import MissingTranslationsVali
 from bot_framework.role_management.loaders import RoleLoader
 from bot_framework.language_management.providers import RedisPhraseProvider
 from bot_framework.menus import (
-    CommandsMenuSender,
     MainMenuSender,
     MenuButtonConfig,
-    ShowCommandsHandler,
     StartCommandHandler,
 )
 from bot_framework.menus.language_menu import LanguageMenuFactory
@@ -163,40 +161,23 @@ class BotApplication:
         )
         request_role_flow_router = request_role_flow_factory.create_router()
 
-        self._commands_menu_sender = CommandsMenuSender(
-            message_sender=self.core.message_sender,
-            phrase_repo=self.phrase_repo,
-            title_phrase_key="commands.list_title",
-        )
-
-        self._show_commands_handler = ShowCommandsHandler(
-            callback_answerer=self.core.callback_answerer,
-            commands_menu_sender=self._commands_menu_sender,
-            user_repo=self.user_repo,
-        )
-        self.core.callback_handler_registry.register(self._show_commands_handler)
-
         self._main_menu_sender = MainMenuSender(
             message_sender=self.core.message_sender,
             phrase_repo=self.phrase_repo,
             welcome_phrase_key="bot.start.welcome",
-            buttons=[
-                MenuButtonConfig(
-                    phrase_key="commands.menu_button",
-                    handler=self._show_commands_handler,
-                ),
-            ],
+            buttons=[],
         )
 
-        start_command_handler = StartCommandHandler(
+        self._start_command_handler = StartCommandHandler(
             user_repo=self.user_repo,
             role_repo=self.role_repo,
             main_menu_sender=self._main_menu_sender,
             request_role_flow_router=request_role_flow_router,
+            message_sender=self.core.message_sender,
         )
 
         self.core.message_handler_registry.register(
-            handler=start_command_handler,
+            handler=self._start_command_handler,
             commands=["start"],
             content_types=["text"],
         )
@@ -222,14 +203,8 @@ class BotApplication:
         config = MenuButtonConfig(phrase_key=phrase_key, handler=handler)
         self._main_menu_sender.buttons.insert(0, config)
 
-    def add_commands_button(
-        self,
-        phrase_key: str,
-        handler: ICallbackHandler,
-    ) -> None:
-        self._commands_menu_sender.add_button(
-            MenuButtonConfig(phrase_key=phrase_key, handler=handler)
-        )
+    def set_start_allowed_roles(self, roles: set[str]) -> None:
+        self._start_command_handler.allowed_roles = roles
 
     @property
     def bot(self) -> TeleBot:  # noqa: F821
