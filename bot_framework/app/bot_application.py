@@ -48,7 +48,7 @@ class BotApplication:
         phrases_json_path: Path | None = None,
         languages_json_path: Path | None = None,
         roles_json_path: Path | None = None,
-        use_class_middlewares: bool = False,
+        use_class_middlewares: bool = True,
         auto_migrate: bool = True,
     ) -> None:
         if auto_migrate:

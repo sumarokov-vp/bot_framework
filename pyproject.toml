@@ -1,6 +1,6 @@
 [project]
 name = "bot-framework"
-version = "0.2.0"
+version = "0.2.1"
 description = "Reusable Telegram bot framework with Clean Architecture"
 readme = "README.md"
 authors = [

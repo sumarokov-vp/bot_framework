@@ -39,7 +39,7 @@ class TelegramMessageCore:
         bot_token: str,
         database_url: str | None = None,
         flow_message_storage: IFlowMessageStorage | None = None,
-        use_class_middlewares: bool = False,
+        use_class_middlewares: bool = True,
     ) -> None:
         self.bot = TeleBot(token=bot_token, use_class_middlewares=use_class_middlewares)
         self.flow_message_storage = flow_message_storage
