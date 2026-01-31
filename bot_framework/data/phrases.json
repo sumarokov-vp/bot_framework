@@ -23,6 +23,42 @@
     "ru": "Выберите роль:",
     "en": "Select your role:"
   },
+  "request_role.already_has_role": {
+    "ru": "У вас уже есть эта роль",
+    "en": "You already have this role"
+  },
+  "request_role.sent": {
+    "ru": "Запрос на роль отправлен",
+    "en": "Role request sent"
+  },
+  "request_role.no_supervisors": {
+    "ru": "Нет супервайзеров для одобрения этой роли",
+    "en": "No supervisors available to approve this role"
+  },
+  "request_role.no_roles": {
+    "ru": "Нет доступных ролей",
+    "en": "No roles available"
+  },
+  "request_role.supervisor.title": {
+    "ru": "Запрос на роль",
+    "en": "Role request"
+  },
+  "request_role.button.approve": {
+    "ru": "Одобрить",
+    "en": "Approve"
+  },
+  "request_role.button.reject": {
+    "ru": "Отклонить",
+    "en": "Reject"
+  },
+  "request_role.approved": {
+    "ru": "Ваш запрос на роль одобрен",
+    "en": "Your role request has been approved"
+  },
+  "request_role.rejected": {
+    "ru": "Ваш запрос на роль отклонён",
+    "en": "Your role request has been rejected"
+  },
   "language.select_title": {
     "ru": "Выберите язык:",
     "en": "Select your language:"
