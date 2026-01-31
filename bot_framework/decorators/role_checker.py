@@ -52,7 +52,13 @@ def check_message_roles[M: MessageHandler](func: M) -> M:
             user_role_names = {role.name for role in user_roles}
 
             if not (user_role_names & self.allowed_roles):
-                if hasattr(self, "message_sender"):
+                if hasattr(self, "request_role_flow_router") and hasattr(
+                    self, "user_repo"
+                ):
+                    user = self.user_repo.get_by_id(id=telegram_id)
+                    self.request_role_flow_router.start(user)
+                    return
+                if hasattr(self, "message_sender") and self.message_sender:
                     self.message_sender.send(
                         chat_id=message.chat_id,
                         text=f"You do not have the required roles: {self.allowed_roles}",

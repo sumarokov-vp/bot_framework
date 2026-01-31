@@ -110,6 +110,63 @@ language - Change language
 
 This enables command autocompletion in Telegram when users type `/`.
 
+## Main Menu
+
+The main menu is shown when user sends `/start` command. By default, the menu has no buttons — you add them from your application.
+
+### Adding buttons
+
+Use `add_main_menu_button()` to add buttons to the main menu. Buttons are added in reverse order (first added appears last):
+
+```python
+from bot_framework.app import BotApplication
+from bot_framework.protocols.i_callback_handler import ICallbackHandler
+
+class OrdersHandler(ICallbackHandler):
+    callback_data = "orders"
+
+    def handle(self, callback: BotCallback) -> None:
+        # Handle button press
+        ...
+
+app = BotApplication(
+    bot_token="YOUR_BOT_TOKEN",
+    database_url="postgres://user:pass@localhost/dbname",
+    redis_url="redis://localhost:6379/0",
+    phrases_json_path=Path("data/phrases.json"),
+)
+
+orders_handler = OrdersHandler()
+app.callback_handler_registry.register(orders_handler)
+
+# Add button to main menu
+app.add_main_menu_button("mybot.orders", orders_handler)
+```
+
+Add phrase for the button in `data/phrases.json`:
+
+```json
+{
+  "mybot.orders": {
+    "ru": "📦 Мои заказы",
+    "en": "📦 My Orders"
+  }
+}
+```
+
+### Restricting /start access
+
+By default, `/start` is available to all users. You can restrict access to specific roles:
+
+```python
+# Only users with "admin" or "manager" role can use /start
+app.set_start_allowed_roles({"admin", "manager"})
+```
+
+Users without required roles will be redirected to the role request flow when trying to use `/start`.
+
+**Important:** This is typically used for internal bots where access should be limited. For public bots, leave this unrestricted (don't call `set_start_allowed_roles`).
+
 ## Database Migrations
 
 Bot Framework includes built-in database migrations using yoyo-migrations. Migrations are applied automatically when creating a `BotApplication` instance.
