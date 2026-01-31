@@ -34,8 +34,6 @@ class TelegramMessageSender(IMessageSender):
                 parse_mode=self._core.convert_parse_mode(parse_mode),
                 reply_markup=reply_markup,
             )
-            self._core.register_message(chat_id, msg.message_id, flow_name)
-            return self._core.create_bot_message(chat_id, msg)
         except Exception as er:
             self._logger.error("Failed to send message", exc_info=er)
             msg = self._core.bot.send_message(
@@ -43,8 +41,11 @@ class TelegramMessageSender(IMessageSender):
                 text=text,
                 reply_markup=reply_markup,
             )
+        try:
             self._core.register_message(chat_id, msg.message_id, flow_name)
-            return self._core.create_bot_message(chat_id, msg)
+        except Exception as er:
+            self._logger.error("Failed to register message", exc_info=er)
+        return self._core.create_bot_message(chat_id, msg)
 
     def send_markdown_as_html(
         self,
