@@ -9,6 +9,8 @@ from .role import Role
 from .role_name import RoleName
 from .user import User
 
+type SourceContext = BotCallback | BotMessage
+
 __all__ = [
     "BotCallback",
     "BotMessage",
@@ -20,5 +22,6 @@ __all__ = [
     "ParseMode",
     "Role",
     "RoleName",
+    "SourceContext",
     "User",
 ]
