@@ -15,6 +15,13 @@ from bot_framework.flow_management.services import (
     FlowStackNavigator,
     FlowStackValidator,
 )
+from bot_framework.flow_management.step_flow import (
+    BaseStep,
+    Flow,
+    IStep,
+    IStepStateStorage,
+    StepField,
+)
 
 __all__ = [
     "FlowStackEntry",
@@ -28,4 +35,9 @@ __all__ = [
     "FlowStackValidator",
     "IFlowMessageDeleter",
     "IFlowStackValidator",
+    "BaseStep",
+    "Flow",
+    "IStep",
+    "IStepStateStorage",
+    "StepField",
 ]
