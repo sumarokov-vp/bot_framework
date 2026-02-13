@@ -164,6 +164,7 @@ class BotApplication:
         self._main_menu_sender = MainMenuSender(
             message_sender=self.core.message_sender,
             phrase_repo=self.phrase_repo,
+            role_repo=self.role_repo,
             welcome_phrase_key="bot.start.welcome",
             buttons=[],
         )
