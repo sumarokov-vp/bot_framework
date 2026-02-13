@@ -28,4 +28,7 @@ class IMessageSender(Protocol):
         chat_id: int,
         document: bytes,
         filename: str,
+        keyboard: Keyboard | None = None,
     ) -> BotMessage: ...
+
+    def download_document(self, file_id: str) -> bytes: ...

@@ -62,13 +62,20 @@ class TelegramMessageSender(IMessageSender):
         chat_id: int,
         document: bytes,
         filename: str,
+        keyboard: Keyboard | None = None,
     ) -> BotMessage:
         from io import BytesIO
 
+        reply_markup = self._core.convert_keyboard(keyboard) if keyboard else None
         file_obj = BytesIO(document)
         file_obj.name = filename
         msg = self._core.bot.send_document(
             chat_id=chat_id,
             document=file_obj,
+            reply_markup=reply_markup,
         )
         return self._core.create_bot_message(chat_id, msg)
+
+    def download_document(self, file_id: str) -> bytes:
+        file_info = self._core.bot.get_file(file_id)
+        return self._core.bot.download_file(file_info.file_path)

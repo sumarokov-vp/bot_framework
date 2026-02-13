@@ -51,8 +51,12 @@ class TelegramMessageService(IMessageService):
         chat_id: int,
         document: bytes,
         filename: str,
+        keyboard: Keyboard | None = None,
     ) -> BotMessage:
-        return self._sender.send_document(chat_id, document, filename)
+        return self._sender.send_document(chat_id, document, filename, keyboard)
+
+    def download_document(self, file_id: str) -> bytes:
+        return self._sender.download_document(file_id)
 
     def replace(
         self,
