@@ -115,7 +115,15 @@ class TelegramMessageCore:
             )
 
     def create_bot_message(self, chat_id: int, msg: object) -> BotMessage:
-        bot_message = BotMessage(chat_id=chat_id, message_id=msg.message_id)  # type: ignore[attr-defined]
+        document_file_id = None
+        document = getattr(msg, "document", None)
+        if document:
+            document_file_id = document.file_id
+        bot_message = BotMessage(
+            chat_id=chat_id,
+            message_id=msg.message_id,  # type: ignore[attr-defined]
+            document_file_id=document_file_id,
+        )
         bot_message.set_original(msg)
         return bot_message
 

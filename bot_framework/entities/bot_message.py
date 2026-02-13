@@ -17,6 +17,7 @@ class BotMessage(BaseModel):
     user_id: int | None = None
     text: str | None = None
     from_user: BotMessageUser | None = None
+    document_file_id: str | None = None
     _original: Any = PrivateAttr(default=None)
 
     def get_original(self) -> Any:
