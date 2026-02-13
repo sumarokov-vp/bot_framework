@@ -54,3 +54,6 @@ Thumbs.db
 
 # Agent branch (local per-clone)
 .agent-branch
+
+# Todoist binding (local per-clone)
+.todoist.yaml
