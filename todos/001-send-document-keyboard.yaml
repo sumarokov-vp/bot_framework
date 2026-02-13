@@ -1,0 +1,24 @@
+title: "send_document с поддержкой keyboard"
+status: done
+created_at: 13.02.2026
+completed_at: 13.02.2026
+
+todoist:
+  task_id: "6g2Cqxrxx63Fc2HF"
+
+description: |
+  Метод send_document в IMessageSender и TelegramMessageSender не поддерживает
+  keyboard (reply_markup). Нужно добавить опциональный параметр keyboard,
+  чтобы можно было отправлять файл с инлайн-кнопками.
+
+recommendation: |
+  1. Добавить параметр keyboard: Keyboard | None = None в:
+     - IMessageSender.send_document()
+     - TelegramMessageSender.send_document()
+     - TelegramMessageService.send_document()
+  2. В TelegramMessageSender.send_document() передавать reply_markup в bot.send_document()
+
+solution: |
+  Добавлен параметр keyboard: Keyboard | None = None в send_document() во всех трёх местах:
+  IMessageSender, TelegramMessageSender, TelegramMessageService.
+  В TelegramMessageSender keyboard конвертируется через convert_keyboard и передаётся как reply_markup.

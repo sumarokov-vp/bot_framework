@@ -1,0 +1,26 @@
+title: "Скачивание файлов (document) из сообщений"
+status: done
+created_at: 13.02.2026
+completed_at: 13.02.2026
+
+todoist:
+  task_id: "6g2Cr22Fmv8gm56m"
+
+description: |
+  В bot-framework нет способа скачать файл из полученного сообщения с документом.
+  BotMessage не содержит информации о document. Нужно добавить поддержку документов
+  в BotMessage и сервис для скачивания содержимого файла.
+
+recommendation: |
+  1. Добавить поле document_file_id: str | None = None в BotMessage
+  2. В TelegramMessageCore._to_bot_message() маппить message.document.file_id
+  3. Добавить метод download_file(file_id: str) -> bytes в IBot протокол
+  4. Реализовать через bot.get_file() + bot.download_file()
+  5. Создать сервис/метод для скачивания (или добавить в MessageService)
+
+solution: |
+  1. Добавлено поле document_file_id: str | None в BotMessage
+  2. В TelegramMessageCore.create_bot_message() маппится message.document.file_id
+  3. Добавлены get_file и download_file в IBot протокол
+  4. Добавлен метод download_document(file_id) в IMessageSender, TelegramMessageSender, TelegramMessageService
+  5. Реализация через bot.get_file() + bot.download_file()
