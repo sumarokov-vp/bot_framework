@@ -7,6 +7,8 @@ from bot_framework.entities.keyboard import Keyboard
 
 from .i_callback_answerer import ICallbackAnswerer
 from .i_callback_handler_registry import ICallbackHandlerRegistry
+from .i_document_downloader import IDocumentDownloader
+from .i_document_sender import IDocumentSender
 from .i_message_deleter import IMessageDeleter
 from .i_message_handler_registry import IMessageHandlerRegistry
 from .i_message_replacer import IMessageReplacer
@@ -27,6 +29,12 @@ class IMessageCore(Protocol):
 
     @property
     def message_deleter(self) -> IMessageDeleter: ...
+
+    @property
+    def document_sender(self) -> IDocumentSender: ...
+
+    @property
+    def document_downloader(self) -> IDocumentDownloader: ...
 
     @property
     def callback_handler_registry(self) -> ICallbackHandlerRegistry: ...

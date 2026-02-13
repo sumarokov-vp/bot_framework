@@ -21,10 +21,7 @@ if TYPE_CHECKING:
     from .callback_handler_registry import CallbackHandlerRegistry
     from .message_handler_registry import MessageHandlerRegistry
     from .next_step_handler_registrar import NextStepHandlerRegistrar
-    from .telegram_message_deleter import TelegramMessageDeleter
-    from .telegram_message_replacer import TelegramMessageReplacer
-    from .telegram_message_sender import TelegramMessageSender
-    from .telegram_message_service import TelegramMessageService
+    from .telegram_messenger import TelegramMessenger
 
 TELEGRAM_PARSE_MODE_MAP: dict[ParseMode, str | None] = {
     ParseMode.HTML: "HTML",
@@ -69,25 +66,19 @@ class TelegramMessageCore:
         from .callback_handler_registry import CallbackHandlerRegistry
         from .message_handler_registry import MessageHandlerRegistry
         from .next_step_handler_registrar import NextStepHandlerRegistrar
-        from .telegram_message_deleter import TelegramMessageDeleter
-        from .telegram_message_replacer import TelegramMessageReplacer
-        from .telegram_message_sender import TelegramMessageSender
-        from .telegram_message_service import TelegramMessageService
+        from .telegram_messenger import TelegramMessenger
         from .telegram_notify_replacer import TelegramNotifyReplacer
 
-        self.message_sender: TelegramMessageSender = TelegramMessageSender(self)
-        self.message_replacer: TelegramMessageReplacer = TelegramMessageReplacer(self)
-        self.message_deleter: TelegramMessageDeleter = TelegramMessageDeleter(self)
+        messenger = TelegramMessenger(self)
+        self.message_sender: TelegramMessenger = messenger
+        self.message_replacer: TelegramMessenger = messenger
+        self.message_deleter: TelegramMessenger = messenger
+        self.document_sender: TelegramMessenger = messenger
+        self.document_downloader: TelegramMessenger = messenger
 
-        notify_replacer = TelegramNotifyReplacer(
-            sender=self.message_sender,
-            deleter=self.message_deleter,
-        )
-        self.message_service: TelegramMessageService = TelegramMessageService(
-            sender=self.message_sender,
-            replacer=self.message_replacer,
-            deleter=self.message_deleter,
-            notify_replacer=notify_replacer,
+        self.notify_replacer: TelegramNotifyReplacer = TelegramNotifyReplacer(
+            sender=messenger,
+            deleter=messenger,
         )
 
         self.callback_handler_registry: CallbackHandlerRegistry = (

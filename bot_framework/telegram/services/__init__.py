@@ -6,10 +6,7 @@ from .markdown_to_html_converter import MarkdownToHtmlConverter
 from .message_handler_registry import MessageHandlerRegistry
 from .next_step_handler_registrar import NextStepHandlerRegistrar
 from .telegram_message_core import TelegramMessageCore
-from .telegram_message_deleter import TelegramMessageDeleter
-from .telegram_message_replacer import TelegramMessageReplacer
-from .telegram_message_sender import TelegramMessageSender
-from .telegram_message_service import TelegramMessageService
+from .telegram_messenger import TelegramMessenger
 from .telegram_notify_replacer import TelegramNotifyReplacer
 
 __all__ = [
@@ -21,9 +18,6 @@ __all__ = [
     "MessageHandlerRegistry",
     "NextStepHandlerRegistrar",
     "TelegramMessageCore",
-    "TelegramMessageDeleter",
-    "TelegramMessageReplacer",
-    "TelegramMessageSender",
-    "TelegramMessageService",
+    "TelegramMessenger",
     "TelegramNotifyReplacer",
 ]

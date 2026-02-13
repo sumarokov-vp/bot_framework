@@ -22,13 +22,3 @@ class IMessageSender(Protocol):
         keyboard: Keyboard | None = None,
         flow_name: str | None = None,
     ) -> BotMessage: ...
-
-    def send_document(
-        self,
-        chat_id: int,
-        document: bytes,
-        filename: str,
-        keyboard: Keyboard | None = None,
-    ) -> BotMessage: ...
-
-    def download_document(self, file_id: str) -> bytes: ...

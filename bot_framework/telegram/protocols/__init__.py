@@ -3,6 +3,8 @@ from bot_framework.protocols import (
     ICallbackAnswerer,
     ICallbackHandler,
     ICallbackHandlerRegistry,
+    IDocumentDownloader,
+    IDocumentSender,
     IEnsureUserExists,
     IFlowRouter,
     IMarkdownToHtmlConverter,
@@ -12,7 +14,6 @@ from bot_framework.protocols import (
     IMessageHandlerRegistry,
     IMessageReplacer,
     IMessageSender,
-    IMessageService,
     INextStepHandlerRegistrar,
     INotifyReplacer,
 )
@@ -24,6 +25,8 @@ __all__ = [
     "ICallbackAnswerer",
     "ICallbackHandler",
     "ICallbackHandlerRegistry",
+    "IDocumentDownloader",
+    "IDocumentSender",
     "IEnsureUserExists",
     "IFlowRouter",
     "IMarkdownEscaper",
@@ -34,7 +37,6 @@ __all__ = [
     "IMessageHandlerRegistry",
     "IMessageReplacer",
     "IMessageSender",
-    "IMessageService",
     "INextStepHandlerRegistrar",
     "INotifyReplacer",
 ]

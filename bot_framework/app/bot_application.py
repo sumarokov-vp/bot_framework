@@ -30,10 +30,7 @@ if TYPE_CHECKING:
         CallbackAnswerer,
         CallbackHandlerRegistry,
         NextStepHandlerRegistrar,
-        TelegramMessageDeleter,
-        TelegramMessageReplacer,
-        TelegramMessageSender,
-        TelegramMessageService,
+        TelegramMessenger,
     )
 
 
@@ -212,20 +209,20 @@ class BotApplication:
         return self.core.bot
 
     @property
-    def message_sender(self) -> TelegramMessageSender:  # noqa: F821
+    def message_sender(self) -> TelegramMessenger:  # noqa: F821
         return self.core.message_sender
 
     @property
-    def message_replacer(self) -> TelegramMessageReplacer:  # noqa: F821
+    def message_replacer(self) -> TelegramMessenger:  # noqa: F821
         return self.core.message_replacer
 
     @property
-    def message_deleter(self) -> TelegramMessageDeleter:  # noqa: F821
+    def message_deleter(self) -> TelegramMessenger:  # noqa: F821
         return self.core.message_deleter
 
     @property
-    def message_service(self) -> TelegramMessageService:  # noqa: F821
-        return self.core.message_service
+    def document_sender(self) -> TelegramMessenger:  # noqa: F821
+        return self.core.document_sender
 
     @property
     def callback_handler_registry(self) -> CallbackHandlerRegistry:  # noqa: F821

@@ -22,9 +22,7 @@ from .services import (
     MessageHandlerRegistry,
     NextStepHandlerRegistrar,
     TelegramMessageCore,
-    TelegramMessageDeleter,
-    TelegramMessageReplacer,
-    TelegramMessageSender,
+    TelegramMessenger,
     TelegramNotifyReplacer,
 )
 
@@ -51,8 +49,6 @@ __all__ = [
     "MessageHandlerRegistry",
     "NextStepHandlerRegistrar",
     "TelegramMessageCore",
-    "TelegramMessageDeleter",
-    "TelegramMessageReplacer",
-    "TelegramMessageSender",
+    "TelegramMessenger",
     "TelegramNotifyReplacer",
 ]

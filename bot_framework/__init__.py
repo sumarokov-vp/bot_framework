@@ -25,6 +25,8 @@ from bot_framework.protocols.i_callback_handler import ICallbackHandler
 from bot_framework.protocols.i_callback_handler_registry import (
     ICallbackHandlerRegistry,
 )
+from bot_framework.protocols.i_document_downloader import IDocumentDownloader
+from bot_framework.protocols.i_document_sender import IDocumentSender
 from bot_framework.protocols.i_flow_router import IFlowRouter
 from bot_framework.protocols.i_message_deleter import IMessageDeleter
 from bot_framework.protocols.i_message_handler import IMessageHandler
@@ -56,6 +58,8 @@ __all__ = [
     "ICallbackAnswerer",
     "ICallbackHandler",
     "ICallbackHandlerRegistry",
+    "IDocumentDownloader",
+    "IDocumentSender",
     "IFlowRouter",
     "IMessageDeleter",
     "IMessageHandler",
