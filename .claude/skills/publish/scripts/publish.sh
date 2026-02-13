@@ -25,8 +25,8 @@ VERSION=$(grep -m1 '^version' pyproject.toml | sed 's/.*"\(.*\)".*/\1/')
 echo -e "${YELLOW}Publishing version ${VERSION}...${NC}"
 
 echo -e "${YELLOW}Running linters...${NC}"
-uv run ruff check src/
-uv run mypy src/
+uv run ruff check bot_framework/
+uv run mypy bot_framework/
 
 echo -e "${YELLOW}Running tests...${NC}"
 uv run pytest || [ $? -eq 5 ]
