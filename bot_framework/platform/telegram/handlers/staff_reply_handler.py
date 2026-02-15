@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from bot_framework.core.entities.bot_message import BotMessage
 
 if TYPE_CHECKING:
+    from bot_framework.domain.language_management.repos.protocols.i_phrase_repo import IPhraseRepo
     from bot_framework.domain.role_management.repos.protocols.i_user_repo import IUserRepo
     from telebot import TeleBot
 
@@ -17,10 +18,12 @@ class StaffReplyHandler:
         self,
         bot: TeleBot,
         user_repo: IUserRepo,
+        phrase_repo: IPhraseRepo,
         support_chat_id: int,
     ) -> None:
         self._bot = bot
         self._user_repo = user_repo
+        self._phrase_repo = phrase_repo
         self._support_chat_id = support_chat_id
         self._logger = getLogger(__name__)
 
@@ -46,16 +49,20 @@ class StaffReplyHandler:
             self._logger.warning("No user found for topic_id=%s", thread_id)
             return
 
-        self._send_to_user(user.id, text)
+        self._send_to_user(user, text)
 
     def _find_user_by_topic(self, topic_id: int):  # noqa: ANN202
         return self._user_repo.find_by_support_topic_id(topic_id)
 
-    def _send_to_user(self, chat_id: int, text: str) -> None:
+    def _send_to_user(self, user, text: str) -> None:  # noqa: ANN001
         try:
+            prefix = self._phrase_repo.get_phrase(
+                key="support.staff_prefix",
+                language_code=user.language_code,
+            )
             self._bot.send_message(
-                chat_id=chat_id,
-                text=f"👤 Сотрудник:\n\n{text}",
+                chat_id=user.id,
+                text=f"{prefix}\n\n{text}",
             )
         except Exception as er:
             self._logger.error("Failed to send staff reply to user", exc_info=er)

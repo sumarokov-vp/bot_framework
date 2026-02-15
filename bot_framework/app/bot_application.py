@@ -99,6 +99,8 @@ class BotApplication:
             bot=self.core.bot,
             support_chat_id=support_chat_id,
             support_topic_manager=topic_manager,
+            user_repo=self.user_repo,
+            phrase_repo=self.phrase_provider,
         )
         self.core.message_sender = mirror  # type: ignore[assignment]
         self.core.message_replacer = mirror  # type: ignore[assignment]
@@ -114,6 +116,7 @@ class BotApplication:
         staff_handler = StaffReplyHandler(
             bot=self.core.bot,
             user_repo=self.user_repo,
+            phrase_repo=self.phrase_provider,
             support_chat_id=support_chat_id,
         )
         self.core.message_handler_registry.register(

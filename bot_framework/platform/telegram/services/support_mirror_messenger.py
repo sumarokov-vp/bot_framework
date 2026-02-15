@@ -9,6 +9,8 @@ from bot_framework.core.entities.parse_mode import ParseMode
 
 if TYPE_CHECKING:
     from bot_framework.core.protocols.i_support_topic_manager import ISupportTopicManager
+    from bot_framework.domain.language_management.repos.protocols.i_phrase_repo import IPhraseRepo
+    from bot_framework.domain.role_management.repos.protocols.i_user_repo import IUserRepo
     from bot_framework.platform.telegram.services.telegram_messenger import TelegramMessenger
     from telebot import TeleBot
 
@@ -20,11 +22,15 @@ class SupportMirrorMessenger:
         bot: TeleBot,
         support_chat_id: int,
         support_topic_manager: ISupportTopicManager,
+        user_repo: IUserRepo,
+        phrase_repo: IPhraseRepo,
     ) -> None:
         self._messenger = messenger
         self._bot = bot
         self._support_chat_id = support_chat_id
         self._support_topic_manager = support_topic_manager
+        self._user_repo = user_repo
+        self._phrase_repo = phrase_repo
         self._logger = getLogger(__name__)
 
     def send(
@@ -108,13 +114,19 @@ class SupportMirrorMessenger:
             return
 
         try:
-            topic_id = self._support_topic_manager.ensure_topic(
-                user_id=chat_id,
-                full_name=str(chat_id),
+            user = self._user_repo.find_by_id(chat_id)
+            if not user:
+                self._logger.warning("User not found for chat_id=%s", chat_id)
+                return
+
+            prefix = self._phrase_repo.get_phrase(
+                key="support.bot_prefix",
+                language_code=user.language_code,
             )
+            topic_id = self._support_topic_manager.ensure_topic(user_id=chat_id)
             self._bot.send_message(
                 chat_id=self._support_chat_id,
-                text=f"🤖 Бот:\n\n{text}",
+                text=f"{prefix}\n\n{text}",
                 message_thread_id=topic_id,
             )
         except Exception as er:
