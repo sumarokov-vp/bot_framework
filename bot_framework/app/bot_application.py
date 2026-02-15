@@ -38,6 +38,9 @@ if TYPE_CHECKING:
         IMessageSender,
         INextStepHandlerRegistrar,
     )
+    from bot_framework.core.protocols.i_support_topic_manager import (
+        ISupportTopicManager,
+    )
 
 
 class BotApplication:
@@ -127,6 +130,7 @@ class BotApplication:
         if topic_name_format:
             manager_kwargs["topic_name_format"] = topic_name_format
         topic_manager = SupportTopicManager(**manager_kwargs)  # type: ignore[arg-type]
+        self._support_topic_manager = topic_manager
 
         mirror = SupportMirrorMessenger(
             messenger=self.core.message_sender,
@@ -319,6 +323,10 @@ class BotApplication:
     @property
     def next_step_registrar(self) -> INextStepHandlerRegistrar:
         return self.core.next_step_registrar
+
+    @property
+    def support_topic_manager(self) -> ISupportTopicManager | None:
+        return getattr(self, "_support_topic_manager", None)
 
     @property
     def close_handler(self) -> CloseCallbackHandler:
