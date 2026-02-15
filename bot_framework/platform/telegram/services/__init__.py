@@ -7,6 +7,8 @@ from .message_handler_registry import MessageHandlerRegistry
 from .next_step_handler_registrar import NextStepHandlerRegistrar
 from .telegram_message_core import TelegramMessageCore
 from .telegram_messenger import TelegramMessenger
+from .support_mirror_messenger import SupportMirrorMessenger
+from .telegram_forum_topic_creator import TelegramForumTopicCreator
 from .telegram_notify_replacer import TelegramNotifyReplacer
 
 __all__ = [
@@ -19,5 +21,7 @@ __all__ = [
     "NextStepHandlerRegistrar",
     "TelegramMessageCore",
     "TelegramMessenger",
+    "SupportMirrorMessenger",
+    "TelegramForumTopicCreator",
     "TelegramNotifyReplacer",
 ]

@@ -521,6 +521,37 @@ name_handler.set_flow(flow)
 email_handler.set_flow(flow)
 ```
 
+## Support Chat
+
+Support Chat mirrors user conversations into a Telegram supergroup with forum topics, allowing staff to monitor and reply to users directly.
+
+### How it works
+
+- **User messages** are forwarded to a dedicated topic in the support chat
+- **Bot replies** are mirrored as text copies in the topic
+- **Staff replies** in a topic are sent to the user with a "👤 Сотрудник:" prefix
+
+### Setup
+
+1. Create a Telegram supergroup and enable **Topics** (Group Settings → Topics)
+2. Add your bot as admin with **Manage Topics** permission
+3. Pass the chat ID when creating `BotApplication`:
+
+```python
+app = BotApplication(
+    bot_token="YOUR_BOT_TOKEN",
+    database_url="postgres://user:pass@localhost/dbname",
+    redis_url="redis://localhost:6379/0",
+    support_chat_id=-1001234567890,  # Supergroup with forum topics
+)
+```
+
+### Limitations
+
+- Maximum 1000 topics per supergroup (Telegram limit)
+- Topic names are limited to 128 characters
+- Bot must be an admin with `can_manage_topics` permission
+
 ## Optional Dependencies
 
 - `telegram` - pyTelegramBotAPI for Telegram bot integration

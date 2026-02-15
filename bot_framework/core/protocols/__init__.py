@@ -18,11 +18,15 @@ from .i_next_step_handler_registrar import INextStepHandlerRegistrar
 from .i_notify_replacer import INotifyReplacer
 from .i_remaining_time_formatter import IRemainingTimeFormatter
 from .i_bot import IBot
+from .i_forum_topic_creator import IForumTopicCreator
 from .i_middleware import IMiddleware
+from .i_support_topic_manager import ISupportTopicManager
 
 __all__ = [
     "IBot",
+    "IForumTopicCreator",
     "IMiddleware",
+    "ISupportTopicManager",
     "ICallbackAnswerer",
     "ICallbackHandler",
     "ICallbackHandlerRegistry",

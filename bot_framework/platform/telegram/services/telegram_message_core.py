@@ -110,10 +110,12 @@ class TelegramMessageCore:
         document = getattr(msg, "document", None)
         if document:
             document_file_id = document.file_id
+        message_thread_id = getattr(msg, "message_thread_id", None)
         bot_message = BotMessage(
             chat_id=chat_id,
             message_id=msg.message_id,  # type: ignore[attr-defined]
             document_file_id=document_file_id,
+            message_thread_id=message_thread_id,
         )
         bot_message.set_original(msg)
         return bot_message

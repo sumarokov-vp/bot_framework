@@ -30,3 +30,8 @@ class IUserRepo(
         user_id: int,
         language_code: str,
     ) -> None: ...
+
+    def find_by_support_topic_id(
+        self,
+        topic_id: int,
+    ) -> UserT | None: ...

@@ -174,6 +174,20 @@ class UserRepo(IUserRepo):
                     },
                 )
 
+    def find_by_support_topic_id(
+        self,
+        topic_id: int,
+    ) -> User | None:
+        with psycopg.connect(self.database_url) as conn:
+            with conn.cursor(row_factory=class_row(User)) as cur:
+                cur.execute(
+                    "SELECT * FROM users WHERE support_topic_id = %(topic_id)s",
+                    {
+                        "topic_id": topic_id,
+                    },
+                )
+                return cur.fetchone()
+
     def update_language(
         self,
         user_id: int,

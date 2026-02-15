@@ -11,12 +11,27 @@ class IBot(Protocol):
         text: str,
         parse_mode: str | None = None,
         reply_markup: Any = None,
+        message_thread_id: int | None = None,
     ) -> Any: ...
 
     def send_document(
         self,
         chat_id: int,
         document: Any,
+    ) -> Any: ...
+
+    def forward_message(
+        self,
+        chat_id: int,
+        from_chat_id: int,
+        message_id: int,
+        message_thread_id: int | None = None,
+    ) -> Any: ...
+
+    def create_forum_topic(
+        self,
+        chat_id: int,
+        name: str,
     ) -> Any: ...
 
     def get_file(self, file_id: str) -> Any: ...

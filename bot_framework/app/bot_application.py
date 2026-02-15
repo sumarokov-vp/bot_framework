@@ -45,6 +45,7 @@ class BotApplication:
         roles_json_path: Path | None = None,
         use_class_middlewares: bool = True,
         auto_migrate: bool = True,
+        support_chat_id: int | None = None,
     ) -> None:
         if auto_migrate:
             from bot_framework.app.migrations import apply_migrations
@@ -70,7 +71,56 @@ class BotApplication:
         self.phrase_provider = RedisPhraseProvider(redis_url=redis_url)
         self.phrase_repo = self.phrase_provider  # обратная совместимость
 
+        if support_chat_id:
+            self._setup_support_chat(support_chat_id)
+
         self._setup_menus(redis_url)
+
+    def _setup_support_chat(self, support_chat_id: int) -> None:
+        from bot_framework.domain.support_chat.services import SupportTopicManager
+        from bot_framework.platform.telegram.handlers import StaffReplyHandler
+        from bot_framework.platform.telegram.middleware import SupportChatMiddleware
+        from bot_framework.platform.telegram.services.support_mirror_messenger import (
+            SupportMirrorMessenger,
+        )
+        from bot_framework.platform.telegram.services.telegram_forum_topic_creator import (
+            TelegramForumTopicCreator,
+        )
+
+        forum_topic_creator = TelegramForumTopicCreator(bot=self.core.bot)
+        topic_manager = SupportTopicManager(
+            support_chat_id=support_chat_id,
+            user_repo=self.user_repo,
+            forum_topic_creator=forum_topic_creator,
+        )
+
+        mirror = SupportMirrorMessenger(
+            messenger=self.core.message_sender,
+            bot=self.core.bot,
+            support_chat_id=support_chat_id,
+            support_topic_manager=topic_manager,
+        )
+        self.core.message_sender = mirror  # type: ignore[assignment]
+        self.core.message_replacer = mirror  # type: ignore[assignment]
+        self.core.document_sender = mirror  # type: ignore[assignment]
+
+        middleware = SupportChatMiddleware(
+            support_chat_id=support_chat_id,
+            support_topic_manager=topic_manager,
+            bot=self.core.bot,
+        )
+        self.core.bot.setup_middleware(middleware)
+
+        staff_handler = StaffReplyHandler(
+            bot=self.core.bot,
+            user_repo=self.user_repo,
+            support_chat_id=support_chat_id,
+        )
+        self.core.message_handler_registry.register(
+            handler=staff_handler,
+            func=lambda m: m.chat.id == support_chat_id,
+            content_types=["text"],
+        )
 
     def _load_languages(
         self,
