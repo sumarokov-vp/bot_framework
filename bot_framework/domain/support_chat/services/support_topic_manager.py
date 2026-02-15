@@ -16,20 +16,24 @@ class SupportTopicManager:
         self._user_repo = user_repo
         self._forum_topic_creator = forum_topic_creator
 
-    def ensure_topic(self, user_id: int, full_name: str) -> int:
+    def ensure_topic(self, user_id: int) -> int:
         user = self._user_repo.get_by_id(user_id)
         if user.support_topic_id:
             return user.support_topic_id
 
+        full_name = self._build_full_name(user.first_name, user.last_name)
         topic_name = self._build_topic_name(user_id, full_name)
         topic_id = self._forum_topic_creator.create_topic(
             chat_id=self._support_chat_id,
             name=topic_name,
         )
 
-        user.support_topic_id = topic_id
-        self._user_repo.update(user)
+        self._user_repo.set_support_topic_id(user_id, topic_id)
         return topic_id
+
+    def _build_full_name(self, first_name: str | None, last_name: str | None) -> str:
+        parts = [p for p in (first_name, last_name) if p]
+        return " ".join(parts) or "Unknown"
 
     def _build_topic_name(self, user_id: int, full_name: str) -> str:
         suffix = f" [ID:{user_id}]"

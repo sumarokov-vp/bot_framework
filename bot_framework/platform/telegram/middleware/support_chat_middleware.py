@@ -41,25 +41,9 @@ class SupportChatMiddleware(TelegramBaseMiddleware):
         if not from_user:
             return
 
-        full_name = self._build_full_name(
-            first_name=from_user.first_name,
-            last_name=from_user.last_name,
-        )
-
-        topic_id = self._support_topic_manager.ensure_topic(
-            user_id=from_user.id,
-            full_name=full_name,
-        )
+        topic_id = self._support_topic_manager.ensure_topic(user_id=from_user.id)
 
         self._forward_to_support(message, topic_id)
-
-    def _build_full_name(
-        self,
-        first_name: str | None,
-        last_name: str | None,
-    ) -> str:
-        parts = [p for p in (first_name, last_name) if p]
-        return " ".join(parts) or "Unknown"
 
     def _forward_to_support(self, message: Message, topic_id: int) -> None:
         from telebot import TeleBot
