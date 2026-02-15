@@ -1,0 +1,18 @@
+title: Добавить set_support_topic_id в IUserRepo
+status: open
+created_at: 15.02.2026
+completed_at: null
+
+todoist:
+  task_id: "6g2g8h3fXPV3X7hm"
+
+description: |
+  SupportTopicManager вызывает user_repo.update(user), который обновляет все поля User.
+  Нужен точечный метод для обновления только support_topic_id.
+  Race condition между get_by_id и update.
+
+recommendation: |
+  Добавить метод set_support_topic_id(user_id, topic_id) в IUserRepo и UserRepo.
+  Использовать его в SupportTopicManager вместо update(user).
+
+solution: null
