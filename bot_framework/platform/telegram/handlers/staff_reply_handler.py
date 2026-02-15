@@ -6,9 +6,15 @@ from typing import TYPE_CHECKING
 from bot_framework.core.entities.bot_message import BotMessage
 
 if TYPE_CHECKING:
-    from bot_framework.domain.language_management.repos.protocols.i_phrase_repo import IPhraseRepo
-    from bot_framework.domain.role_management.repos.protocols.i_user_repo import IUserRepo
-    from telebot import TeleBot
+    from bot_framework.core.protocols.i_thread_message_sender import (
+        IThreadMessageSender,
+    )
+    from bot_framework.domain.language_management.repos.protocols.i_phrase_repo import (
+        IPhraseRepo,
+    )
+    from bot_framework.domain.role_management.repos.protocols.i_user_repo import (
+        IUserRepo,
+    )
 
 
 class StaffReplyHandler:
@@ -16,12 +22,12 @@ class StaffReplyHandler:
 
     def __init__(
         self,
-        bot: TeleBot,
+        thread_message_sender: IThreadMessageSender,
         user_repo: IUserRepo,
         phrase_repo: IPhraseRepo,
         support_chat_id: int,
     ) -> None:
-        self._bot = bot
+        self._thread_message_sender = thread_message_sender
         self._user_repo = user_repo
         self._phrase_repo = phrase_repo
         self._support_chat_id = support_chat_id
@@ -60,7 +66,7 @@ class StaffReplyHandler:
                 key="support.staff_prefix",
                 language_code=user.language_code,
             )
-            self._bot.send_message(
+            self._thread_message_sender.send_message(
                 chat_id=user.id,
                 text=f"{prefix}\n\n{text}",
             )

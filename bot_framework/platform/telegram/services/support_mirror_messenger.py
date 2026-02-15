@@ -8,25 +8,35 @@ from bot_framework.core.entities.keyboard import Keyboard
 from bot_framework.core.entities.parse_mode import ParseMode
 
 if TYPE_CHECKING:
-    from bot_framework.core.protocols.i_support_topic_manager import ISupportTopicManager
-    from bot_framework.domain.language_management.repos.protocols.i_phrase_repo import IPhraseRepo
-    from bot_framework.domain.role_management.repos.protocols.i_user_repo import IUserRepo
-    from bot_framework.platform.telegram.services.telegram_messenger import TelegramMessenger
-    from telebot import TeleBot
+    from bot_framework.core.protocols.i_support_topic_manager import (
+        ISupportTopicManager,
+    )
+    from bot_framework.core.protocols.i_thread_message_sender import (
+        IThreadMessageSender,
+    )
+    from bot_framework.domain.language_management.repos.protocols.i_phrase_repo import (
+        IPhraseRepo,
+    )
+    from bot_framework.domain.role_management.repos.protocols.i_user_repo import (
+        IUserRepo,
+    )
+    from bot_framework.platform.telegram.services.telegram_messenger import (
+        TelegramMessenger,
+    )
 
 
 class SupportMirrorMessenger:
     def __init__(
         self,
         messenger: TelegramMessenger,
-        bot: TeleBot,
+        thread_message_sender: IThreadMessageSender,
         support_chat_id: int,
         support_topic_manager: ISupportTopicManager,
         user_repo: IUserRepo,
         phrase_repo: IPhraseRepo,
     ) -> None:
         self._messenger = messenger
-        self._bot = bot
+        self._thread_message_sender = thread_message_sender
         self._support_chat_id = support_chat_id
         self._support_topic_manager = support_topic_manager
         self._user_repo = user_repo
@@ -124,7 +134,7 @@ class SupportMirrorMessenger:
                 language_code=user.language_code,
             )
             topic_id = self._support_topic_manager.ensure_topic(user_id=chat_id)
-            self._bot.send_message(
+            self._thread_message_sender.send_message(
                 chat_id=self._support_chat_id,
                 text=f"{prefix}\n\n{text}",
                 message_thread_id=topic_id,
