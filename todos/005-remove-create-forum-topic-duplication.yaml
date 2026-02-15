@@ -1,7 +1,7 @@
 title: Убрать дублирование create_forum_topic в IBot и IForumTopicCreator
-status: open
+status: done
 created_at: 15.02.2026
-completed_at: null
+completed_at: 15.02.2026
 
 todoist:
   task_id: "6g2g8gvMGq9r9cRF"
@@ -14,4 +14,8 @@ recommendation: |
   Оставить только IForumTopicCreator.create_topic, удалить метод из IBot.
   Обновить все использования.
 
-solution: null
+solution: |
+  Удалён метод create_forum_topic из IBot протокола. Метод использовался только внутри
+  TelegramForumTopicCreator, который реализует IForumTopicCreator и вызывает нативный
+  метод Telegram bot API. Все проверки типов (mypy, pyright) и линтинг (ruff, lint-imports)
+  прошли успешно.

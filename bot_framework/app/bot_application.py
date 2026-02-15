@@ -8,9 +8,14 @@ from bot_framework.features.flows.request_role_flow import RequestRoleFlowFactor
 from bot_framework.features.flows.request_role_flow.repos import (
     RedisRequestRoleFlowStateStorage,
 )
-from bot_framework.domain.language_management.loaders import LanguageLoader, PhraseLoader
+from bot_framework.domain.language_management.loaders import (
+    LanguageLoader,
+    PhraseLoader,
+)
 from bot_framework.domain.language_management.repos import LanguageRepo
-from bot_framework.domain.language_management.validators import MissingTranslationsValidator
+from bot_framework.domain.language_management.validators import (
+    MissingTranslationsValidator,
+)
 from bot_framework.domain.role_management.loaders import RoleLoader
 from bot_framework.domain.language_management.providers import RedisPhraseProvider
 from bot_framework.features.menus import (
@@ -87,7 +92,9 @@ class BotApplication:
             TelegramForumTopicCreator,
         )
 
-        forum_topic_creator = TelegramForumTopicCreator(bot=self.core.bot)
+        forum_topic_creator = TelegramForumTopicCreator(
+            raw_forum_topic_creator=self.core.bot,
+        )
         topic_manager = SupportTopicManager(
             support_chat_id=support_chat_id,
             user_repo=self.user_repo,
@@ -96,7 +103,7 @@ class BotApplication:
 
         mirror = SupportMirrorMessenger(
             messenger=self.core.message_sender,
-            bot=self.core.bot,
+            thread_message_sender=self.core.bot,
             support_chat_id=support_chat_id,
             support_topic_manager=topic_manager,
             user_repo=self.user_repo,
@@ -109,12 +116,12 @@ class BotApplication:
         middleware = SupportChatMiddleware(
             support_chat_id=support_chat_id,
             support_topic_manager=topic_manager,
-            bot=self.core.bot,
+            message_forwarder=self.core.bot,
         )
         self.core.bot.setup_middleware(middleware)
 
         staff_handler = StaffReplyHandler(
-            bot=self.core.bot,
+            thread_message_sender=self.core.bot,
             user_repo=self.user_repo,
             phrase_repo=self.phrase_provider,
             support_chat_id=support_chat_id,

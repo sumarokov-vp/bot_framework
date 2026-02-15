@@ -20,20 +20,6 @@ class IBot(Protocol):
         document: Any,
     ) -> Any: ...
 
-    def forward_message(
-        self,
-        chat_id: int,
-        from_chat_id: int,
-        message_id: int,
-        message_thread_id: int | None = None,
-    ) -> Any: ...
-
-    def create_forum_topic(
-        self,
-        chat_id: int,
-        name: str,
-    ) -> Any: ...
-
     def get_file(self, file_id: str) -> Any: ...
 
     def download_file(self, file_path: str) -> bytes: ...
@@ -75,7 +61,5 @@ class IBot(Protocol):
         message: Any,
         callback: Callable[..., Any],
     ) -> None: ...
-
-    def setup_middleware(self, middleware: Any) -> None: ...
 
     def infinity_polling(self) -> None: ...

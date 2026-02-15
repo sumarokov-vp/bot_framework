@@ -1,7 +1,7 @@
 title: Разбить IBot на специализированные протоколы (ISP)
-status: open
+status: done
 created_at: 15.02.2026
-completed_at: null
+completed_at: 15.02.2026
 
 todoist:
   task_id: "6g2g8gh4J2J7xc8m"
@@ -16,4 +16,24 @@ recommendation: |
   Использовать существующий IForumTopicCreator вместо метода в IBot.
   Обновить зависимости классов на узкие протоколы.
 
-solution: null
+solution: |
+  Созданы специализированные протоколы:
+  - IMessageForwarder (bot_framework/core/protocols/i_message_forwarder.py) — форвардинг сообщений
+  - IMiddlewareSetup (bot_framework/core/protocols/i_middleware_setup.py) — настройка middleware
+
+  Удалены методы из IBot:
+  - forward_message (перенесён в IMessageForwarder)
+  - setup_middleware (перенесён в IMiddlewareSetup)
+  - create_forum_topic (уже был удалён ранее, используется IForumTopicCreator)
+
+  Обновлены зависимости:
+  - SupportChatMiddleware теперь зависит от IMessageForwarder вместо object-типа bot
+  - BotApplication передаёт bot как IMessageForwarder в SupportChatMiddleware
+
+  Сигнатура IMessageForwarder.forward_message приведена в соответствие с TeleBot для совместимости типов.
+
+  Проверки:
+  - ruff check/format: ✓
+  - mypy: ✓
+  - pyright: ✓
+  - lint-imports: ✓ (слои соблюдены)

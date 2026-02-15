@@ -10,7 +10,7 @@ from bot_framework.platform.telegram.middleware.telegram_base_middleware import 
 )
 
 if TYPE_CHECKING:
-    from bot_framework.core.protocols.i_support_topic_manager import ISupportTopicManager
+    from bot_framework.core.protocols import IMessageForwarder, ISupportTopicManager
 
 
 class SupportChatMiddleware(TelegramBaseMiddleware):
@@ -20,12 +20,12 @@ class SupportChatMiddleware(TelegramBaseMiddleware):
         self,
         support_chat_id: int,
         support_topic_manager: ISupportTopicManager,
-        bot: object,
+        message_forwarder: IMessageForwarder,
     ) -> None:
         super().__init__()
         self._support_chat_id = support_chat_id
         self._support_topic_manager = support_topic_manager
-        self._bot = bot
+        self._message_forwarder = message_forwarder
         self._logger = getLogger(__name__)
         self.update_sensitive = False
 
@@ -46,11 +46,8 @@ class SupportChatMiddleware(TelegramBaseMiddleware):
         self._forward_to_support(message, topic_id)
 
     def _forward_to_support(self, message: Message, topic_id: int) -> None:
-        from telebot import TeleBot
-
-        bot: TeleBot = self._bot  # type: ignore[assignment]
         try:
-            bot.forward_message(
+            self._message_forwarder.forward_message(
                 chat_id=self._support_chat_id,
                 from_chat_id=message.chat.id,
                 message_id=message.message_id,
