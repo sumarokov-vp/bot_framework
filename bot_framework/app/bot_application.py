@@ -3,37 +3,40 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bot_framework.flow_management import RedisFlowMessageStorage
-from bot_framework.flows.request_role_flow import RequestRoleFlowFactory
-from bot_framework.flows.request_role_flow.repos import (
+from bot_framework.domain.flow_management import RedisFlowMessageStorage
+from bot_framework.features.flows.request_role_flow import RequestRoleFlowFactory
+from bot_framework.features.flows.request_role_flow.repos import (
     RedisRequestRoleFlowStateStorage,
 )
-from bot_framework.language_management.loaders import LanguageLoader, PhraseLoader
-from bot_framework.language_management.repos import LanguageRepo
-from bot_framework.language_management.validators import MissingTranslationsValidator
-from bot_framework.role_management.loaders import RoleLoader
-from bot_framework.language_management.providers import RedisPhraseProvider
-from bot_framework.menus import (
+from bot_framework.domain.language_management.loaders import (
+    LanguageLoader,
+    PhraseLoader,
+)
+from bot_framework.domain.language_management.repos import LanguageRepo
+from bot_framework.domain.language_management.validators import (
+    MissingTranslationsValidator,
+)
+from bot_framework.domain.role_management.loaders import RoleLoader
+from bot_framework.domain.language_management.providers import RedisPhraseProvider
+from bot_framework.features.menus import (
     MainMenuSender,
     MenuButtonConfig,
     StartCommandHandler,
 )
-from bot_framework.menus.language_menu import LanguageMenuFactory
-from bot_framework.protocols.i_callback_handler import ICallbackHandler
-from bot_framework.role_management.repos import RoleRepo, UserRepo
-from bot_framework.telegram import CloseCallbackHandler, TelegramMessageCore
+from bot_framework.features.menus.language_menu import LanguageMenuFactory
+from bot_framework.core.protocols.i_callback_handler import ICallbackHandler
+from bot_framework.domain.role_management.repos import RoleRepo, UserRepo
+from bot_framework.platform.telegram import CloseCallbackHandler, TelegramMessageCore
 
 if TYPE_CHECKING:
-    from telebot import TeleBot
-
-    from bot_framework.telegram.services import (
-        CallbackAnswerer,
-        CallbackHandlerRegistry,
-        NextStepHandlerRegistrar,
-        TelegramMessageDeleter,
-        TelegramMessageReplacer,
-        TelegramMessageSender,
-        TelegramMessageService,
+    from bot_framework.core.protocols import (
+        ICallbackAnswerer,
+        ICallbackHandlerRegistry,
+        IDocumentSender,
+        IMessageDeleter,
+        IMessageReplacer,
+        IMessageSender,
+        INextStepHandlerRegistrar,
     )
 
 
@@ -48,9 +51,10 @@ class BotApplication:
         roles_json_path: Path | None = None,
         use_class_middlewares: bool = True,
         auto_migrate: bool = True,
+        support_chat_id: int | None = None,
     ) -> None:
         if auto_migrate:
-            from bot_framework.migrations import apply_migrations
+            from bot_framework.app.migrations import apply_migrations
 
             apply_migrations(database_url)
 
@@ -73,7 +77,61 @@ class BotApplication:
         self.phrase_provider = RedisPhraseProvider(redis_url=redis_url)
         self.phrase_repo = self.phrase_provider  # обратная совместимость
 
+        if support_chat_id:
+            self._setup_support_chat(support_chat_id)
+
         self._setup_menus(redis_url)
+
+    def _setup_support_chat(self, support_chat_id: int) -> None:
+        from bot_framework.domain.support_chat.services import SupportTopicManager
+        from bot_framework.platform.telegram.handlers import StaffReplyHandler
+        from bot_framework.platform.telegram.middleware import SupportChatMiddleware
+        from bot_framework.platform.telegram.services.support_mirror_messenger import (
+            SupportMirrorMessenger,
+        )
+        from bot_framework.platform.telegram.services.telegram_forum_topic_creator import (
+            TelegramForumTopicCreator,
+        )
+
+        forum_topic_creator = TelegramForumTopicCreator(
+            raw_forum_topic_creator=self.core.raw_forum_topic_creator,
+        )
+        topic_manager = SupportTopicManager(
+            support_chat_id=support_chat_id,
+            user_repo=self.user_repo,
+            forum_topic_creator=forum_topic_creator,
+        )
+
+        mirror = SupportMirrorMessenger(
+            messenger=self.core.message_sender,
+            thread_message_sender=self.core.thread_message_sender,
+            support_chat_id=support_chat_id,
+            support_topic_manager=topic_manager,
+            user_repo=self.user_repo,
+            phrase_repo=self.phrase_provider,
+        )
+        self.core.message_sender = mirror  # type: ignore[assignment]
+        self.core.message_replacer = mirror  # type: ignore[assignment]
+        self.core.document_sender = mirror  # type: ignore[assignment]
+
+        middleware = SupportChatMiddleware(
+            support_chat_id=support_chat_id,
+            support_topic_manager=topic_manager,
+            message_forwarder=self.core.message_forwarder,
+        )
+        self.core.middleware_setup.setup_middleware(middleware)
+
+        staff_handler = StaffReplyHandler(
+            thread_message_sender=self.core.thread_message_sender,
+            user_repo=self.user_repo,
+            phrase_repo=self.phrase_provider,
+            support_chat_id=support_chat_id,
+        )
+        self.core.message_handler_registry.register(
+            handler=staff_handler,
+            func=lambda m: m.chat.id == support_chat_id,
+            content_types=["text"],
+        )
 
     def _load_languages(
         self,
@@ -164,6 +222,7 @@ class BotApplication:
         self._main_menu_sender = MainMenuSender(
             message_sender=self.core.message_sender,
             phrase_repo=self.phrase_repo,
+            role_repo=self.role_repo,
             welcome_phrase_key="bot.start.welcome",
             buttons=[],
         )
@@ -207,35 +266,31 @@ class BotApplication:
         self._start_command_handler.allowed_roles = roles
 
     @property
-    def bot(self) -> TeleBot:  # noqa: F821
-        return self.core.bot
-
-    @property
-    def message_sender(self) -> TelegramMessageSender:  # noqa: F821
+    def message_sender(self) -> IMessageSender:
         return self.core.message_sender
 
     @property
-    def message_replacer(self) -> TelegramMessageReplacer:  # noqa: F821
+    def message_replacer(self) -> IMessageReplacer:
         return self.core.message_replacer
 
     @property
-    def message_deleter(self) -> TelegramMessageDeleter:  # noqa: F821
+    def message_deleter(self) -> IMessageDeleter:
         return self.core.message_deleter
 
     @property
-    def message_service(self) -> TelegramMessageService:  # noqa: F821
-        return self.core.message_service
+    def document_sender(self) -> IDocumentSender:
+        return self.core.document_sender
 
     @property
-    def callback_handler_registry(self) -> CallbackHandlerRegistry:  # noqa: F821
+    def callback_handler_registry(self) -> ICallbackHandlerRegistry:
         return self.core.callback_handler_registry
 
     @property
-    def callback_answerer(self) -> CallbackAnswerer:  # noqa: F821
+    def callback_answerer(self) -> ICallbackAnswerer:
         return self.core.callback_answerer
 
     @property
-    def next_step_registrar(self) -> NextStepHandlerRegistrar:  # noqa: F821
+    def next_step_registrar(self) -> INextStepHandlerRegistrar:
         return self.core.next_step_registrar
 
     @property
@@ -243,4 +298,4 @@ class BotApplication:
         return self._close_handler
 
     def run(self) -> None:
-        self.core.bot.infinity_polling()
+        self.core.polling_bot.infinity_polling()

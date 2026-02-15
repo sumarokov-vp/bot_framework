@@ -70,5 +70,13 @@
   "language.menu_button": {
     "ru": "Язык",
     "en": "Language"
+  },
+  "support.staff_prefix": {
+    "ru": "👤 Сотрудник:",
+    "en": "👤 Staff:"
+  },
+  "support.bot_prefix": {
+    "ru": "🤖 Бот:",
+    "en": "🤖 Bot:"
   }
 }

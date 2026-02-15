@@ -37,65 +37,62 @@ app = BotApplication(
     redis_url="redis://localhost:6379/0",
 )
 
-# Use unified message service
-message_service = app.message_service
-
+# Use individual message protocols
 keyboard = Keyboard(rows=[
     [Button(text="Option 1", callback_data="opt1")],
     [Button(text="Option 2", callback_data="opt2")],
 ])
 
 # Send new message
-message_service.send(chat_id=123, text="Choose an option:", keyboard=keyboard)
+app.message_sender.send(chat_id=123, text="Choose an option:", keyboard=keyboard)
 
 # Replace existing message
-message_service.replace(chat_id=123, message_id=456, text="Updated text")
+app.message_replacer.replace(chat_id=123, message_id=456, text="Updated text")
 
 # Delete message
-message_service.delete(chat_id=123, message_id=456)
+app.message_deleter.delete(chat_id=123, message_id=456)
 ```
 
-## Message Services
+## Message Protocols
 
-Bot Framework provides a unified `TelegramMessageService` that combines all message operations:
+Bot Framework follows Interface Segregation Principle with separate protocols for each operation:
 
-| Method | Description |
-|--------|-------------|
-| `send()` | Send a new message |
-| `send_markdown_as_html()` | Send markdown converted to HTML |
-| `send_document()` | Send a file |
-| `replace()` | Edit existing message |
-| `delete()` | Delete message |
-| `notify_replace()` | Delete old message and send new one |
+| Protocol | Method | Description |
+|----------|--------|-------------|
+| `IMessageSender` | `send()`, `send_markdown_as_html()` | Send new messages |
+| `IMessageReplacer` | `replace()` | Edit existing message |
+| `IMessageDeleter` | `delete()` | Delete message |
+| `IDocumentSender` | `send_document()` | Send a file |
+| `IDocumentDownloader` | `download_document()` | Download a file |
+| `INotifyReplacer` | `notify_replace()` | Delete old message and send new one |
 
 ### Using in your handlers
 
-Use `IMessageService` protocol for dependency injection:
+Use specific protocols for dependency injection:
 
 ```python
-from bot_framework.protocols.i_message_service import IMessageService
+from bot_framework.protocols import IMessageSender, IMessageReplacer
 
 class MyHandler:
-    def __init__(self, message_service: IMessageService) -> None:
-        self.message_service = message_service
+    def __init__(
+        self,
+        message_sender: IMessageSender,
+        message_replacer: IMessageReplacer,
+    ) -> None:
+        self.message_sender = message_sender
+        self.message_replacer = message_replacer
 
-    def handle(self, chat_id: int, message_id: int) -> None:
-        # Switch between send/replace by changing method name only
-        self.message_service.replace(
-            chat_id=chat_id,
-            message_id=message_id,
-            text="Updated!",
-        )
+    def handle(self, chat_id: int) -> None:
+        self.message_sender.send(chat_id=chat_id, text="Hello!")
 ```
 
-### Legacy services (still available)
-
-Individual services are still available for backwards compatibility:
+### Available via BotApplication
 
 ```python
-message_sender = app.message_sender    # IMessageSender
-message_replacer = app.message_replacer  # IMessageReplacer
-message_deleter = app.message_deleter   # IMessageDeleter
+app.message_sender      # IMessageSender
+app.message_replacer    # IMessageReplacer
+app.message_deleter     # IMessageDeleter
+app.document_sender     # IDocumentSender
 ```
 
 ## Bot Commands
@@ -523,6 +520,37 @@ flow.on_complete(lambda user, state: confirm_sender.send(user, state))
 name_handler.set_flow(flow)
 email_handler.set_flow(flow)
 ```
+
+## Support Chat
+
+Support Chat mirrors user conversations into a Telegram supergroup with forum topics, allowing staff to monitor and reply to users directly.
+
+### How it works
+
+- **User messages** are forwarded to a dedicated topic in the support chat
+- **Bot replies** are mirrored as text copies in the topic
+- **Staff replies** in a topic are sent to the user with a "👤 Сотрудник:" prefix
+
+### Setup
+
+1. Create a Telegram supergroup and enable **Topics** (Group Settings → Topics)
+2. Add your bot as admin with **Manage Topics** permission
+3. Pass the chat ID when creating `BotApplication`:
+
+```python
+app = BotApplication(
+    bot_token="YOUR_BOT_TOKEN",
+    database_url="postgres://user:pass@localhost/dbname",
+    redis_url="redis://localhost:6379/0",
+    support_chat_id=-1001234567890,  # Supergroup with forum topics
+)
+```
+
+### Limitations
+
+- Maximum 1000 topics per supergroup (Telegram limit)
+- Topic names are limited to 128 characters
+- Bot must be an admin with `can_manage_topics` permission
 
 ## Optional Dependencies
 

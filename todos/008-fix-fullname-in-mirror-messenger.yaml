@@ -1,0 +1,25 @@
+title: Исправить full_name=str(chat_id) в SupportMirrorMessenger
+status: done
+created_at: 15.02.2026
+completed_at: 15.02.2026
+
+todoist:
+  task_id: "6g2g8h5FJVC4RMvF"
+
+description: |
+  SupportMirrorMessenger передаёт full_name=str(chat_id) в ensure_topic,
+  что создаёт топики с числовым именем вместо ФИО пользователя.
+  В SupportChatMiddleware имя получается корректно.
+
+recommendation: |
+  Убрать full_name из параметров ensure_topic. Получать имя из user_repo
+  внутри SupportTopicManager, либо ввести отдельный метод get_topic_id
+  для случаев, когда топик уже точно создан.
+
+solution: |
+  Удалён параметр full_name из метода ensure_topic в ISupportTopicManager и SupportTopicManager.
+  Теперь SupportTopicManager получает данные пользователя (first_name, last_name) из user_repo
+  внутри метода ensure_topic и сам формирует full_name через метод _build_full_name.
+  Обновлены вызовы в SupportMirrorMessenger и SupportChatMiddleware.
+  Удалён метод _build_full_name из SupportChatMiddleware, т.к. теперь логика формирования имени
+  централизована в SupportTopicManager.

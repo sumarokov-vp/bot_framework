@@ -1,0 +1,40 @@
+from bot_framework.core.protocols import (
+    ICallbackAnswerer,
+    ICallbackHandler,
+    ICallbackHandlerRegistry,
+    IDocumentDownloader,
+    IDocumentSender,
+    IEnsureUserExists,
+    IFlowRouter,
+    IMarkdownToHtmlConverter,
+    IMessageCore,
+    IMessageDeleter,
+    IMessageHandler,
+    IMessageHandlerRegistry,
+    IMessageReplacer,
+    IMessageSender,
+    INextStepHandlerRegistrar,
+    INotifyReplacer,
+)
+
+from .i_markdown_escaper import IMarkdownEscaper
+
+__all__ = [
+    "ICallbackAnswerer",
+    "ICallbackHandler",
+    "ICallbackHandlerRegistry",
+    "IDocumentDownloader",
+    "IDocumentSender",
+    "IEnsureUserExists",
+    "IFlowRouter",
+    "IMarkdownEscaper",
+    "IMarkdownToHtmlConverter",
+    "IMessageCore",
+    "IMessageDeleter",
+    "IMessageHandler",
+    "IMessageHandlerRegistry",
+    "IMessageReplacer",
+    "IMessageSender",
+    "INextStepHandlerRegistrar",
+    "INotifyReplacer",
+]

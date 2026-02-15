@@ -1,6 +1,6 @@
 [project]
 name = "bot-framework"
-version = "0.2.1"
+version = "0.5.2"
 description = "Reusable Telegram bot framework with Clean Architecture"
 readme = "README.md"
 authors = [
@@ -27,6 +27,16 @@ dev = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    ".claude/",
+    ".import_linter_cache/",
+    ".python-version",
+    "CLAUDE.md",
+    "stubs/",
+    "todos/",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["bot_framework"]
@@ -93,16 +103,8 @@ name = "bot_framework layers"
 type = "layers"
 layers = [
     "bot_framework.app",
-    "bot_framework.migrations",
-    "bot_framework.menus",
-    "bot_framework.flows",
-    "bot_framework.telegram",
-    "bot_framework.flow_management",
-    "bot_framework.role_management",
-    "bot_framework.services",
-    "bot_framework.language_management",
-    "bot_framework.decorators",
-    "bot_framework.protocols",
-    "bot_framework.entities",
-    "bot_framework.base_protocols",
+    "bot_framework.features",
+    "bot_framework.platform",
+    "bot_framework.domain",
+    "bot_framework.core",
 ]

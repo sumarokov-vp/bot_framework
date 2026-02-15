@@ -1,0 +1,36 @@
+title: Заменить зависимости от TeleBot на абстракции (DIP)
+status: done
+created_at: 15.02.2026
+completed_at: 15.02.2026
+
+todoist:
+  task_id: "6g2g8gpxxQvrH6xm"
+
+description: |
+  StaffReplyHandler, SupportChatMiddleware и SupportMirrorMessenger зависят
+  от конкретного TeleBot вместо протоколов. Нарушение DIP, усложняет тестирование.
+
+recommendation: |
+  Заменить TeleBot на протоколы: IMessageSender, IMessageForwarder и т.д.
+  Зависит от задачи 003 (разбиение IBot на протоколы).
+
+solution: |
+  Созданы новые протоколы:
+  - IThreadMessageSender — для отправки сообщений в форум-треды (send_message с message_thread_id)
+  - IRawForumTopicCreator — для создания форум-топиков (возвращает raw тип TeleBot)
+
+  Обновлены классы:
+  - StaffReplyHandler: TeleBot → IThreadMessageSender
+  - SupportMirrorMessenger: TeleBot → IThreadMessageSender
+  - TelegramForumTopicCreator: TeleBot → IRawForumTopicCreator (адаптер извлекает message_thread_id)
+  - TelegramBaseMiddleware: TeleBot → IMiddlewareSetup (в методе register)
+
+  Обновлён BotApplication._setup_support_chat: передаёт протоколы вместо self.core.bot.
+
+  Все проверки прошли успешно:
+  - ruff check/format ✓
+  - mypy ✓
+  - pyright ✓
+  - lint-imports ✓
+
+  Зависимости от конкретного TeleBot заменены на абстракции, соблюдён Dependency Inversion Principle.

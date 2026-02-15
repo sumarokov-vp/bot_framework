@@ -1,0 +1,38 @@
+title: Заменить хардкод русских строк на PhraseProvider
+status: done
+created_at: 15.02.2026
+completed_at: 15.02.2026
+
+todoist:
+  task_id: "6g2g8h25GCPHpCrF"
+
+description: |
+  В StaffReplyHandler ("👤 Сотрудник:") и SupportMirrorMessenger ("🤖 Бот:")
+  захардкожены русские строки. Библиотека имеет систему мультиязычности (PhraseProvider),
+  но не использует её здесь.
+
+recommendation: |
+  Вынести строки в phrases и использовать PhraseProvider для получения текста
+  на нужном языке.
+
+solution: |
+  Добавлены ключи фраз в bot_framework/data/phrases.json:
+  - support.staff_prefix (ru: "👤 Сотрудник:", en: "👤 Staff:")
+  - support.bot_prefix (ru: "🤖 Бот:", en: "🤖 Bot:")
+
+  Обновлены классы:
+  1. StaffReplyHandler:
+     - Добавлен параметр phrase_repo: IPhraseRepo в конструктор
+     - Метод _send_to_user теперь принимает объект user вместо chat_id
+     - Префикс получается через phrase_repo.get_phrase() с language_code пользователя
+
+  2. SupportMirrorMessenger:
+     - Добавлены параметры user_repo: IUserRepo и phrase_repo: IPhraseRepo в конструктор
+     - Метод _mirror_text получает user из репозитория по chat_id
+     - Префикс получается через phrase_repo.get_phrase() с language_code пользователя
+
+  3. BotApplication._setup_support_chat:
+     - Передача phrase_provider в конструкторы StaffReplyHandler и SupportMirrorMessenger
+     - Передача user_repo в конструктор SupportMirrorMessenger
+
+  Теперь префиксы поддерживают мультиязычность на уровне пользователя.

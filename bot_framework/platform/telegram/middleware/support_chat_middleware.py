@@ -1,0 +1,65 @@
+from __future__ import annotations
+
+from logging import getLogger
+from typing import TYPE_CHECKING
+
+from telebot.types import Message
+
+from bot_framework.platform.telegram.middleware.telegram_base_middleware import (
+    TelegramBaseMiddleware,
+)
+
+if TYPE_CHECKING:
+    from bot_framework.core.protocols import IMessageForwarder, ISupportTopicManager
+
+
+class SupportChatMiddleware(TelegramBaseMiddleware):
+    update_types = ["message"]
+
+    def __init__(
+        self,
+        support_chat_id: int,
+        support_topic_manager: ISupportTopicManager,
+        message_forwarder: IMessageForwarder,
+    ) -> None:
+        super().__init__()
+        self._support_chat_id = support_chat_id
+        self._support_topic_manager = support_topic_manager
+        self._message_forwarder = message_forwarder
+        self._logger = getLogger(__name__)
+        self.update_sensitive = False
+
+    def pre_process(
+        self,
+        message: Message,
+        data: dict[str, object],
+    ) -> None:
+        if message.chat.id == self._support_chat_id:
+            return
+
+        from_user = message.from_user
+        if not from_user:
+            return
+
+        topic_id = self._support_topic_manager.ensure_topic(user_id=from_user.id)
+
+        self._forward_to_support(message, topic_id)
+
+    def _forward_to_support(self, message: Message, topic_id: int) -> None:
+        try:
+            self._message_forwarder.forward_message(
+                chat_id=self._support_chat_id,
+                from_chat_id=message.chat.id,
+                message_id=message.message_id,
+                message_thread_id=topic_id,
+            )
+        except Exception as er:
+            self._logger.error("Failed to forward message to support chat", exc_info=er)
+
+    def post_process(
+        self,
+        message: Message,
+        data: dict[str, object],
+        exception: Exception | None,
+    ) -> None:
+        pass
