@@ -29,13 +29,14 @@ from bot_framework.domain.role_management.repos import RoleRepo, UserRepo
 from bot_framework.platform.telegram import CloseCallbackHandler, TelegramMessageCore
 
 if TYPE_CHECKING:
-    from telebot import TeleBot
-
-    from bot_framework.platform.telegram.services import (
-        CallbackAnswerer,
-        CallbackHandlerRegistry,
-        NextStepHandlerRegistrar,
-        TelegramMessenger,
+    from bot_framework.core.protocols import (
+        ICallbackAnswerer,
+        ICallbackHandlerRegistry,
+        IDocumentSender,
+        IMessageDeleter,
+        IMessageReplacer,
+        IMessageSender,
+        INextStepHandlerRegistrar,
     )
 
 
@@ -265,35 +266,31 @@ class BotApplication:
         self._start_command_handler.allowed_roles = roles
 
     @property
-    def bot(self) -> TeleBot:  # noqa: F821
-        return self.core.bot
-
-    @property
-    def message_sender(self) -> TelegramMessenger:  # noqa: F821
+    def message_sender(self) -> IMessageSender:
         return self.core.message_sender
 
     @property
-    def message_replacer(self) -> TelegramMessenger:  # noqa: F821
+    def message_replacer(self) -> IMessageReplacer:
         return self.core.message_replacer
 
     @property
-    def message_deleter(self) -> TelegramMessenger:  # noqa: F821
+    def message_deleter(self) -> IMessageDeleter:
         return self.core.message_deleter
 
     @property
-    def document_sender(self) -> TelegramMessenger:  # noqa: F821
+    def document_sender(self) -> IDocumentSender:
         return self.core.document_sender
 
     @property
-    def callback_handler_registry(self) -> CallbackHandlerRegistry:  # noqa: F821
+    def callback_handler_registry(self) -> ICallbackHandlerRegistry:
         return self.core.callback_handler_registry
 
     @property
-    def callback_answerer(self) -> CallbackAnswerer:  # noqa: F821
+    def callback_answerer(self) -> ICallbackAnswerer:
         return self.core.callback_answerer
 
     @property
-    def next_step_registrar(self) -> NextStepHandlerRegistrar:  # noqa: F821
+    def next_step_registrar(self) -> INextStepHandlerRegistrar:
         return self.core.next_step_registrar
 
     @property
