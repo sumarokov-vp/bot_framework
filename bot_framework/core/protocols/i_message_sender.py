@@ -1,0 +1,24 @@
+from typing import Protocol
+
+from bot_framework.core.entities.bot_message import BotMessage
+from bot_framework.core.entities.keyboard import Keyboard
+from bot_framework.core.entities.parse_mode import ParseMode
+
+
+class IMessageSender(Protocol):
+    def send(
+        self,
+        chat_id: int,
+        text: str,
+        parse_mode: ParseMode = ParseMode.HTML,
+        keyboard: Keyboard | None = None,
+        flow_name: str | None = None,
+    ) -> BotMessage: ...
+
+    def send_markdown_as_html(
+        self,
+        chat_id: int,
+        text: str,
+        keyboard: Keyboard | None = None,
+        flow_name: str | None = None,
+    ) -> BotMessage: ...

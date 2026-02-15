@@ -3,30 +3,30 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bot_framework.flow_management import RedisFlowMessageStorage
-from bot_framework.flows.request_role_flow import RequestRoleFlowFactory
-from bot_framework.flows.request_role_flow.repos import (
+from bot_framework.domain.flow_management import RedisFlowMessageStorage
+from bot_framework.features.flows.request_role_flow import RequestRoleFlowFactory
+from bot_framework.features.flows.request_role_flow.repos import (
     RedisRequestRoleFlowStateStorage,
 )
-from bot_framework.language_management.loaders import LanguageLoader, PhraseLoader
-from bot_framework.language_management.repos import LanguageRepo
-from bot_framework.language_management.validators import MissingTranslationsValidator
-from bot_framework.role_management.loaders import RoleLoader
-from bot_framework.language_management.providers import RedisPhraseProvider
-from bot_framework.menus import (
+from bot_framework.domain.language_management.loaders import LanguageLoader, PhraseLoader
+from bot_framework.domain.language_management.repos import LanguageRepo
+from bot_framework.domain.language_management.validators import MissingTranslationsValidator
+from bot_framework.domain.role_management.loaders import RoleLoader
+from bot_framework.domain.language_management.providers import RedisPhraseProvider
+from bot_framework.features.menus import (
     MainMenuSender,
     MenuButtonConfig,
     StartCommandHandler,
 )
-from bot_framework.menus.language_menu import LanguageMenuFactory
-from bot_framework.protocols.i_callback_handler import ICallbackHandler
-from bot_framework.role_management.repos import RoleRepo, UserRepo
-from bot_framework.telegram import CloseCallbackHandler, TelegramMessageCore
+from bot_framework.features.menus.language_menu import LanguageMenuFactory
+from bot_framework.core.protocols.i_callback_handler import ICallbackHandler
+from bot_framework.domain.role_management.repos import RoleRepo, UserRepo
+from bot_framework.platform.telegram import CloseCallbackHandler, TelegramMessageCore
 
 if TYPE_CHECKING:
     from telebot import TeleBot
 
-    from bot_framework.telegram.services import (
+    from bot_framework.platform.telegram.services import (
         CallbackAnswerer,
         CallbackHandlerRegistry,
         NextStepHandlerRegistrar,
@@ -47,7 +47,7 @@ class BotApplication:
         auto_migrate: bool = True,
     ) -> None:
         if auto_migrate:
-            from bot_framework.migrations import apply_migrations
+            from bot_framework.app.migrations import apply_migrations
 
             apply_migrations(database_url)
 

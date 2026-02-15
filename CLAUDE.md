@@ -33,35 +33,44 @@ lint-imports               # Check import layer violations
 
 ### Layer Hierarchy (top to bottom)
 
-Layers can only import from layers below them:
+Layers can only import from layers below them (4 layers instead of 13):
 
 ```
-menus                 # Pre-built menu handlers (start, commands)
-flows                 # Dialog flows (request_role_flow)
-telegram              # Telegram-specific implementations
-flow_management       # Flow stack navigation and state (Redis storage)
-role_management       # User roles and permissions
-services              # Utility services (formatters, calculators)
-language_management   # Multilingual phrase support
-decorators            # Role checking decorators
-protocols             # Abstract interfaces (I-prefixed)
-entities              # Domain models (Pydantic)
-base_protocols        # Generic CRUD protocols (ICreate, IRead, etc.)
+bot_framework/
+├── app/                          # Layer 4: Application (bot_application, migrations)
+├── features/                     # Layer 3: Features (user scenarios)
+│   ├── menus/                    #   Pre-built menu handlers
+│   └── flows/                    #   Dialog flows (request_role_flow)
+├── platform/                     # Layer 2: Platform implementations
+│   └── telegram/                 #   Telegram-specific (messenger, middleware, registries)
+├── domain/                       # Layer 1: Domain logic
+│   ├── flow_management/          #   Flow stack navigation (Redis storage)
+│   ├── role_management/          #   User roles and permissions
+│   ├── language_management/      #   Multilingual phrase support
+│   ├── services/                 #   Utility services (formatters, calculators)
+│   └── decorators/               #   Role checking decorators
+├── core/                         # Layer 0: Foundation (no internal deps)
+│   ├── protocols/                #   Abstract interfaces (I-prefixed)
+│   ├── entities/                 #   Domain models (Pydantic)
+│   └── base_protocols/           #   Generic CRUD protocols
+└── data/                         # Static data (outside layers)
 ```
+
+Dependencies: `app → features → platform → domain → core`
 
 ### Key Modules
 
-- **bot_framework.telegram** - Telegram implementations: `TelegramMessageSender`, `TelegramMessageReplacer`, middleware (`EnsureUserMiddleware`), callback/message registries
-- **bot_framework.flow_management** - Dialog flow stack with Redis storage: `FlowStackNavigator`, `FlowRegistry`, `RedisFlowStackStorage`
-- **bot_framework.role_management** - User roles: `RoleRepo`, `UserRole` entity
-- **bot_framework.language_management** - Multilingual: `PhraseRepo`, `LanguageRepo`
-- **bot_framework.menus** - Pre-built menus: `StartCommandHandler`, `MainMenuSender`, `CommandsMenuSender`
-- **bot_framework.flows.request_role_flow** - Complete role request flow with factory
+- **bot_framework.platform.telegram** - Telegram implementations: `TelegramMessenger`, middleware (`EnsureUserMiddleware`), callback/message registries
+- **bot_framework.domain.flow_management** - Dialog flow stack with Redis storage: `FlowStackNavigator`, `FlowRegistry`, `RedisFlowStackStorage`
+- **bot_framework.domain.role_management** - User roles: `RoleRepo`, `UserRole` entity
+- **bot_framework.domain.language_management** - Multilingual: `PhraseRepo`, `LanguageRepo`
+- **bot_framework.features.menus** - Pre-built menus: `StartCommandHandler`, `MainMenuSender`, `CommandsMenuSender`
+- **bot_framework.features.flows.request_role_flow** - Complete role request flow with factory
 
 ### Protocol Pattern
 
 All interfaces use `I` prefix and are Protocol classes. Implementations are in separate modules:
-- `protocols/i_message_sender.py` → `services/telegram_message_sender.py`
+- `core/protocols/i_message_sender.py` → `platform/telegram/services/telegram_messenger.py`
 
 ### Role Checking Decorators
 
