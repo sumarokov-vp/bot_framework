@@ -11,7 +11,9 @@ from .i_ensure_user_exists import IEnsureUserExists
 from .i_file_downloader_bot import IFileDownloaderBot
 from .i_flow_router import IFlowRouter
 from .i_forum_topic_creator import IForumTopicCreator
+from .i_forum_topic_editor import IForumTopicEditor
 from .i_raw_forum_topic_creator import IRawForumTopicCreator
+from .i_raw_forum_topic_editor import IRawForumTopicEditor
 from .i_thread_message_sender import IThreadMessageSender
 from .i_markdown_to_html_converter import IMarkdownToHtmlConverter
 from .i_message_core import IMessageCore
@@ -46,6 +48,7 @@ __all__ = [
     "IFileDownloaderBot",
     "IFlowRouter",
     "IForumTopicCreator",
+    "IForumTopicEditor",
     "IMarkdownToHtmlConverter",
     "IMessageCore",
     "IMessageDeleter",
@@ -63,6 +66,7 @@ __all__ = [
     "INotifyReplacer",
     "IPollingBot",
     "IRawForumTopicCreator",
+    "IRawForumTopicEditor",
     "IRemainingTimeFormatter",
     "ISupportTopicManager",
     "IThreadMessageSender",

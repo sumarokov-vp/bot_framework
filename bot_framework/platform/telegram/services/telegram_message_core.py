@@ -174,6 +174,10 @@ class TelegramMessageCore:
         return self.bot
 
     @property
+    def raw_forum_topic_editor(self):  # noqa: ANN201
+        return self.bot
+
+    @property
     def thread_message_sender(self):  # noqa: ANN201
         return self.bot
 

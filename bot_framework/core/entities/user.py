@@ -17,8 +17,7 @@ class User(BaseModel):
     language_code: str = LanguageCode.EN
     is_bot: bool = False
     is_premium: bool = False
-    support_chat_id: int | None = None
-    support_topic_id: int | None = None
+    phone_number: str | None = None
     party_id: int | None = None
     last_rejection_at: datetime | None = None
     created_at: datetime = Field(default_factory=datetime.now)

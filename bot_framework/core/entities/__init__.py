@@ -7,6 +7,7 @@ from .language_code import LanguageCode
 from .parse_mode import ParseMode
 from .role import Role
 from .role_name import RoleName
+from .support_topic import SupportTopic
 from .user import User
 
 type SourceContext = BotCallback | BotMessage
@@ -23,5 +24,6 @@ __all__ = [
     "Role",
     "RoleName",
     "SourceContext",
+    "SupportTopic",
     "User",
 ]
