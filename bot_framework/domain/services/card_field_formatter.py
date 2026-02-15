@@ -1,5 +1,7 @@
 from bot_framework.core.protocols import ICardFieldFormatter, IDisplayWidthCalculator
-from bot_framework.domain.services.display_width_calculator import DisplayWidthCalculator
+from bot_framework.domain.services.display_width_calculator import (
+    DisplayWidthCalculator,
+)
 
 
 class CardFieldFormatter(ICardFieldFormatter):
@@ -9,7 +11,9 @@ class CardFieldFormatter(ICardFieldFormatter):
         display_width_calculator: IDisplayWidthCalculator | None = None,
     ):
         self.line_length = line_length
-        self._display_width_calculator = display_width_calculator or DisplayWidthCalculator()
+        self._display_width_calculator = (
+            display_width_calculator or DisplayWidthCalculator()
+        )
 
     def display_width(self, text: str) -> int:
         return self._display_width_calculator.calculate(text)
@@ -32,7 +36,10 @@ class CardFieldFormatter(ICardFieldFormatter):
             for word in words:
                 if not current_line:
                     current_line = word
-                elif self.display_width(current_line) + self.display_width(word) + 1 <= self.line_length:
+                elif (
+                    self.display_width(current_line) + self.display_width(word) + 1
+                    <= self.line_length
+                ):
                     current_line += " " + word
                 else:
                     lines.append(current_line)

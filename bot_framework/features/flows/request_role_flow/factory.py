@@ -18,12 +18,16 @@ from bot_framework.features.flows.request_role_flow.protocols import (
 from bot_framework.features.flows.request_role_flow.request_role_flow_router import (
     RequestRoleFlowRouter,
 )
-from bot_framework.domain.language_management.repos.protocols.i_phrase_repo import IPhraseRepo
+from bot_framework.domain.language_management.repos.protocols.i_phrase_repo import (
+    IPhraseRepo,
+)
 from bot_framework.core.protocols.i_callback_answerer import ICallbackAnswerer
 from bot_framework.core.protocols.i_callback_handler_registry import (
     ICallbackHandlerRegistry,
 )
-from bot_framework.core.protocols.i_message_handler_registry import IMessageHandlerRegistry
+from bot_framework.core.protocols.i_message_handler_registry import (
+    IMessageHandlerRegistry,
+)
 from bot_framework.core.protocols.i_message_sender import IMessageSender
 from bot_framework.domain.role_management.repos.protocols.i_role_repo import IRoleRepo
 from bot_framework.domain.role_management.repos.protocols.i_user_repo import IUserRepo

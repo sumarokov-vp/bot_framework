@@ -1,6 +1,8 @@
 from datetime import UTC, datetime
 
-from bot_framework.domain.language_management.repos.protocols.i_phrase_repo import IPhraseRepo
+from bot_framework.domain.language_management.repos.protocols.i_phrase_repo import (
+    IPhraseRepo,
+)
 from bot_framework.core.protocols import IRemainingTimeFormatter
 
 

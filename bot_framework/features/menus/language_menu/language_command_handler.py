@@ -1,5 +1,7 @@
 from bot_framework.core.entities.bot_message import BotMessage
-from bot_framework.features.menus.language_menu.i_language_menu_sender import ILanguageMenuSender
+from bot_framework.features.menus.language_menu.i_language_menu_sender import (
+    ILanguageMenuSender,
+)
 from bot_framework.domain.role_management.repos.protocols.i_user_repo import IUserRepo
 
 

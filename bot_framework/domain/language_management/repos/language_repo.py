@@ -2,7 +2,9 @@ import psycopg
 from psycopg.rows import class_row
 
 from bot_framework.domain.language_management.entities.language import Language
-from bot_framework.domain.language_management.repos.protocols.i_language_repo import ILanguageRepo
+from bot_framework.domain.language_management.repos.protocols.i_language_repo import (
+    ILanguageRepo,
+)
 
 
 class LanguageRepo(ILanguageRepo):

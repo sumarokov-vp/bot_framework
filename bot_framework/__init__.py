@@ -30,7 +30,9 @@ from bot_framework.core.protocols.i_document_sender import IDocumentSender
 from bot_framework.core.protocols.i_flow_router import IFlowRouter
 from bot_framework.core.protocols.i_message_deleter import IMessageDeleter
 from bot_framework.core.protocols.i_message_handler import IMessageHandler
-from bot_framework.core.protocols.i_message_handler_registry import IMessageHandlerRegistry
+from bot_framework.core.protocols.i_message_handler_registry import (
+    IMessageHandlerRegistry,
+)
 from bot_framework.core.protocols.i_message_replacer import IMessageReplacer
 from bot_framework.core.protocols.i_message_sender import IMessageSender
 from bot_framework.core.protocols.i_notify_replacer import INotifyReplacer

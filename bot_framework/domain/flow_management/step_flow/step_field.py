@@ -101,15 +101,19 @@ class StepField[T]:
         def from_raw_value(data: Any) -> StepField[Any]:
             return StepField(value=data)
 
-        from_dict_schema = core_schema.chain_schema([
-            dict_schema,
-            core_schema.no_info_plain_validator_function(from_dict),
-        ])
+        from_dict_schema = core_schema.chain_schema(
+            [
+                dict_schema,
+                core_schema.no_info_plain_validator_function(from_dict),
+            ]
+        )
 
-        from_value_schema = core_schema.chain_schema([
-            core_schema.nullable_schema(inner_schema),
-            core_schema.no_info_plain_validator_function(from_raw_value),
-        ])
+        from_value_schema = core_schema.chain_schema(
+            [
+                core_schema.nullable_schema(inner_schema),
+                core_schema.no_info_plain_validator_function(from_raw_value),
+            ]
+        )
 
         from_instance_schema = core_schema.is_instance_schema(StepField)
 

@@ -1,7 +1,9 @@
 from uuid import uuid4
 
 from bot_framework.core.entities.bot_callback import BotCallback
-from bot_framework.features.flows.request_role_flow.protocols import IRoleRejectionNotifier
+from bot_framework.features.flows.request_role_flow.protocols import (
+    IRoleRejectionNotifier,
+)
 from bot_framework.core.protocols.i_callback_answerer import ICallbackAnswerer
 from bot_framework.domain.role_management.repos.protocols.i_user_repo import IUserRepo
 

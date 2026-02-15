@@ -1,7 +1,9 @@
 from bot_framework.core.entities.button import Button
 from bot_framework.core.entities.keyboard import Keyboard
 from bot_framework.core.entities.user import User
-from bot_framework.domain.language_management.repos.protocols.i_phrase_repo import IPhraseRepo
+from bot_framework.domain.language_management.repos.protocols.i_phrase_repo import (
+    IPhraseRepo,
+)
 from bot_framework.features.menus.start_menu.i_main_menu_sender import IMainMenuSender
 from bot_framework.core.protocols.i_callback_handler import ICallbackHandler
 from bot_framework.core.protocols.i_message_sender import IMessageSender

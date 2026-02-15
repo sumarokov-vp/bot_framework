@@ -4,8 +4,12 @@ from bot_framework.core.entities.user import User
 from bot_framework.domain.language_management.repos.protocols.i_language_repo import (
     ILanguageRepo,
 )
-from bot_framework.domain.language_management.repos.protocols.i_phrase_repo import IPhraseRepo
-from bot_framework.features.menus.language_menu.i_language_menu_sender import ILanguageMenuSender
+from bot_framework.domain.language_management.repos.protocols.i_phrase_repo import (
+    IPhraseRepo,
+)
+from bot_framework.features.menus.language_menu.i_language_menu_sender import (
+    ILanguageMenuSender,
+)
 from bot_framework.core.protocols.i_message_replacer import IMessageReplacer
 from bot_framework.core.protocols.i_message_sender import IMessageSender
 
@@ -30,7 +34,9 @@ class LanguageMenuSender(ILanguageMenuSender):
         rows = []
         for lang in languages:
             is_current = lang.code == user.language_code
-            button_text = f"\u2713 {lang.native_name}" if is_current else lang.native_name
+            button_text = (
+                f"\u2713 {lang.native_name}" if is_current else lang.native_name
+            )
             rows.append(
                 [
                     Button(

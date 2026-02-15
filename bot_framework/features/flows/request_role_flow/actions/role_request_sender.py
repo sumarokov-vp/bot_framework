@@ -2,8 +2,12 @@ from bot_framework.core.entities.button import Button
 from bot_framework.core.entities.keyboard import Keyboard
 from bot_framework.core.entities.role import Role
 from bot_framework.core.entities.user import User
-from bot_framework.features.flows.request_role_flow.exceptions import NoSupervisorsFoundError
-from bot_framework.domain.language_management.repos.protocols.i_phrase_repo import IPhraseRepo
+from bot_framework.features.flows.request_role_flow.exceptions import (
+    NoSupervisorsFoundError,
+)
+from bot_framework.domain.language_management.repos.protocols.i_phrase_repo import (
+    IPhraseRepo,
+)
 from bot_framework.core.protocols.i_message_sender import IMessageSender
 from bot_framework.domain.role_management.repos.protocols.i_user_repo import IUserRepo
 
@@ -40,7 +44,9 @@ class RoleRequestSender:
                 language_code=language_code,
             )
 
-            requester_name = requester.username or requester.first_name or str(requester.id)
+            requester_name = (
+                requester.username or requester.first_name or str(requester.id)
+            )
             text = f"{title}\n\nUser: {requester_name}\nRole: {role.name}"
 
             approve_text = self.phrase_repo.get_phrase(

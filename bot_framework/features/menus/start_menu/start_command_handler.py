@@ -1,6 +1,8 @@
 from bot_framework.domain.decorators.role_checker import check_message_roles
 from bot_framework.core.entities.bot_message import BotMessage
-from bot_framework.features.flows.request_role_flow.protocols import IRequestRoleFlowRouter
+from bot_framework.features.flows.request_role_flow.protocols import (
+    IRequestRoleFlowRouter,
+)
 from bot_framework.features.menus.start_menu.i_main_menu_sender import IMainMenuSender
 from bot_framework.core.protocols.i_message_handler import IMessageHandler
 from bot_framework.core.protocols.i_message_sender import IMessageSender

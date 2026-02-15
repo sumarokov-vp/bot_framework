@@ -25,7 +25,10 @@ class RoleLoader:
                         VALUES (%(name)s, %(description)s)
                         ON CONFLICT (name) DO NOTHING
                         """,
-                        {"name": role["name"], "description": role.get("description", "")},
+                        {
+                            "name": role["name"],
+                            "description": role.get("description", ""),
+                        },
                     )
             conn.commit()
         return len(roles)

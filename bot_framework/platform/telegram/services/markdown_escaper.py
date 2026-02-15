@@ -1,6 +1,8 @@
 import re
 
-from bot_framework.platform.telegram.protocols.i_markdown_escaper import IMarkdownEscaper
+from bot_framework.platform.telegram.protocols.i_markdown_escaper import (
+    IMarkdownEscaper,
+)
 
 
 class MarkdownEscaper(IMarkdownEscaper):

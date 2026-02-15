@@ -1,12 +1,16 @@
 from uuid import uuid4
 
 from bot_framework.core.entities.bot_callback import BotCallback
-from bot_framework.features.flows.request_role_flow.exceptions import NoSupervisorsFoundError
+from bot_framework.features.flows.request_role_flow.exceptions import (
+    NoSupervisorsFoundError,
+)
 from bot_framework.features.flows.request_role_flow.protocols import (
     IRequestRoleFlowStateStorage,
     IRoleRequestSender,
 )
-from bot_framework.domain.language_management.repos.protocols.i_phrase_repo import IPhraseRepo
+from bot_framework.domain.language_management.repos.protocols.i_phrase_repo import (
+    IPhraseRepo,
+)
 from bot_framework.core.protocols.i_callback_answerer import ICallbackAnswerer
 from bot_framework.core.protocols.i_message_sender import IMessageSender
 from bot_framework.domain.role_management.repos.protocols.i_role_repo import IRoleRepo
@@ -57,7 +61,9 @@ class RoleSelectionHandler:
             phrase_key = "request_role.already_has_role"
         else:
             try:
-                self.role_request_sender.send_to_supervisors(requester=requester, role=role)
+                self.role_request_sender.send_to_supervisors(
+                    requester=requester, role=role
+                )
                 phrase_key = "request_role.sent"
             except NoSupervisorsFoundError:
                 phrase_key = "request_role.no_supervisors"
