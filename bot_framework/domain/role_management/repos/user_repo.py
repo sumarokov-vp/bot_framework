@@ -206,3 +206,22 @@ class UserRepo(IUserRepo):
                         "language_code": language_code,
                     },
                 )
+
+    def set_support_topic_id(
+        self,
+        user_id: int,
+        topic_id: int,
+    ) -> None:
+        with psycopg.connect(self.database_url) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users
+                    SET support_topic_id = %(topic_id)s
+                    WHERE id = %(user_id)s
+                    """,
+                    {
+                        "user_id": user_id,
+                        "topic_id": topic_id,
+                    },
+                )

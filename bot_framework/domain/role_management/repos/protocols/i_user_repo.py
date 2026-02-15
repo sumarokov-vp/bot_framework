@@ -35,3 +35,9 @@ class IUserRepo(
         self,
         topic_id: int,
     ) -> UserT | None: ...
+
+    def set_support_topic_id(
+        self,
+        user_id: int,
+        topic_id: int,
+    ) -> None: ...
