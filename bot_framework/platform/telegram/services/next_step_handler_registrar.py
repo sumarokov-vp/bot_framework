@@ -24,7 +24,7 @@ class NextStepHandlerRegistrar:
             bot_msg = self._to_bot_message(msg)
             return handler.handle(bot_msg)
 
-        self._core.bot.register_next_step_handler(
+        self._core.next_step_handler_registrar_bot.register_next_step_handler(
             message.get_original(),
             wrapper,
         )

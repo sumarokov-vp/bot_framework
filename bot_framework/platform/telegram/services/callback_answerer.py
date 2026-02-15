@@ -16,6 +16,6 @@ class CallbackAnswerer:
         text: str | None = None,
         show_alert: bool = False,
     ) -> None:
-        self._core.bot.answer_callback_query(
+        self._core.callback_answerer_bot.answer_callback_query(
             callback_query_id, text=text, show_alert=show_alert
         )

@@ -1,6 +1,5 @@
 from .middleware import EnsureUserMiddleware, TelegramBaseMiddleware
 from .protocols import (
-    IBot,
     ICallbackHandler,
     ICallbackHandlerRegistry,
     IEnsureUserExists,
@@ -31,7 +30,6 @@ __all__ = [
     "CallbackHandlerRegistry",
     "CloseCallbackHandler",
     "EnsureUserMiddleware",
-    "IBot",
     "ICallbackHandler",
     "ICallbackHandlerRegistry",
     "IEnsureUserExists",

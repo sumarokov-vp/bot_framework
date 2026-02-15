@@ -30,7 +30,7 @@ class TelegramMessenger:
         if parse_mode == ParseMode.MARKDOWN:
             text_to_send = self._core.escape_markdown(text)
         try:
-            msg = self._core.bot.send_message(
+            msg = self._core.message_sender_bot.send_message(
                 chat_id=chat_id,
                 text=text_to_send,
                 parse_mode=self._core.convert_parse_mode(parse_mode),
@@ -38,7 +38,7 @@ class TelegramMessenger:
             )
         except Exception as er:
             self._logger.error("Failed to send message", exc_info=er)
-            msg = self._core.bot.send_message(
+            msg = self._core.message_sender_bot.send_message(
                 chat_id=chat_id,
                 text=text,
                 reply_markup=reply_markup,
@@ -73,7 +73,7 @@ class TelegramMessenger:
         if parse_mode == ParseMode.MARKDOWN:
             text_to_send = self._core.escape_markdown(text)
         try:
-            msg = self._core.bot.edit_message_text(
+            msg = self._core.message_sender_bot.edit_message_text(
                 chat_id=chat_id,
                 message_id=message_id,
                 text=text_to_send,
@@ -91,7 +91,9 @@ class TelegramMessenger:
 
     def delete(self, chat_id: int, message_id: int) -> None:
         try:
-            self._core.bot.delete_message(chat_id=chat_id, message_id=message_id)
+            self._core.message_sender_bot.delete_message(
+                chat_id=chat_id, message_id=message_id
+            )
         except Exception as er:
             self._logger.warning("Failed to delete message", exc_info=er)
 
@@ -105,7 +107,7 @@ class TelegramMessenger:
         reply_markup = self._core.convert_keyboard(keyboard) if keyboard else None
         file_obj = BytesIO(document)
         file_obj.name = filename
-        msg = self._core.bot.send_document(
+        msg = self._core.message_sender_bot.send_document(
             chat_id=chat_id,
             document=file_obj,
             reply_markup=reply_markup,
@@ -113,5 +115,5 @@ class TelegramMessenger:
         return self._core.create_bot_message(chat_id, msg)
 
     def download_document(self, file_id: str) -> bytes:
-        file_info = self._core.bot.get_file(file_id)
-        return self._core.bot.download_file(file_info.file_path)
+        file_info = self._core.file_downloader_bot.get_file(file_id)
+        return self._core.file_downloader_bot.download_file(file_info.file_path)

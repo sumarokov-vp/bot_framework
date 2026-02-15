@@ -27,7 +27,7 @@ class MessageHandlerRegistry:
             bot_message = self._to_bot_message(message)
             return handler.handle(bot_message)
 
-        self._core.bot.register_message_handler(
+        self._core.message_handler_registrar_bot.register_message_handler(
             callback=wrapper,
             commands=commands,
             content_types=content_types,

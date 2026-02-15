@@ -140,3 +140,47 @@ class TelegramMessageCore:
 
     def convert_parse_mode(self, parse_mode: ParseMode) -> str | None:
         return TELEGRAM_PARSE_MODE_MAP.get(parse_mode)
+
+    @property
+    def message_sender_bot(self):  # noqa: ANN201
+        return self.bot
+
+    @property
+    def file_downloader_bot(self):  # noqa: ANN201
+        return self.bot
+
+    @property
+    def callback_answerer_bot(self):  # noqa: ANN201
+        return self.bot
+
+    @property
+    def callback_handler_registrar_bot(self):  # noqa: ANN201
+        return self.bot
+
+    @property
+    def message_handler_registrar_bot(self):  # noqa: ANN201
+        return self.bot
+
+    @property
+    def next_step_handler_registrar_bot(self):  # noqa: ANN201
+        return self.bot
+
+    @property
+    def polling_bot(self):  # noqa: ANN201
+        return self.bot
+
+    @property
+    def raw_forum_topic_creator(self):  # noqa: ANN201
+        return self.bot
+
+    @property
+    def thread_message_sender(self):  # noqa: ANN201
+        return self.bot
+
+    @property
+    def message_forwarder(self):  # noqa: ANN201
+        return self.bot
+
+    @property
+    def middleware_setup(self):  # noqa: ANN201
+        return self.bot

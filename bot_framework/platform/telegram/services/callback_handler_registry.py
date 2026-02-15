@@ -20,7 +20,7 @@ class CallbackHandlerRegistry:
             bot_callback = self._to_bot_callback(call)
             handler.handle(bot_callback)
 
-        self._core.bot.register_callback_query_handler(
+        self._core.callback_handler_registrar_bot.register_callback_query_handler(
             wrapper,
             func=lambda call: call.data and call.data.startswith(handler.prefix),
         )

@@ -1,5 +1,4 @@
 from bot_framework.core.protocols import (
-    IBot,
     ICallbackAnswerer,
     ICallbackHandler,
     ICallbackHandlerRegistry,
@@ -21,7 +20,6 @@ from bot_framework.core.protocols import (
 from .i_markdown_escaper import IMarkdownEscaper
 
 __all__ = [
-    "IBot",
     "ICallbackAnswerer",
     "ICallbackHandler",
     "ICallbackHandlerRegistry",

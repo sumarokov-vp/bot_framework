@@ -93,7 +93,7 @@ class BotApplication:
         )
 
         forum_topic_creator = TelegramForumTopicCreator(
-            raw_forum_topic_creator=self.core.bot,
+            raw_forum_topic_creator=self.core.raw_forum_topic_creator,
         )
         topic_manager = SupportTopicManager(
             support_chat_id=support_chat_id,
@@ -103,7 +103,7 @@ class BotApplication:
 
         mirror = SupportMirrorMessenger(
             messenger=self.core.message_sender,
-            thread_message_sender=self.core.bot,
+            thread_message_sender=self.core.thread_message_sender,
             support_chat_id=support_chat_id,
             support_topic_manager=topic_manager,
             user_repo=self.user_repo,
@@ -116,12 +116,12 @@ class BotApplication:
         middleware = SupportChatMiddleware(
             support_chat_id=support_chat_id,
             support_topic_manager=topic_manager,
-            message_forwarder=self.core.bot,
+            message_forwarder=self.core.message_forwarder,
         )
-        self.core.bot.setup_middleware(middleware)
+        self.core.middleware_setup.setup_middleware(middleware)
 
         staff_handler = StaffReplyHandler(
-            thread_message_sender=self.core.bot,
+            thread_message_sender=self.core.thread_message_sender,
             user_repo=self.user_repo,
             phrase_repo=self.phrase_provider,
             support_chat_id=support_chat_id,
@@ -301,4 +301,4 @@ class BotApplication:
         return self._close_handler
 
     def run(self) -> None:
-        self.core.bot.infinity_polling()
+        self.core.polling_bot.infinity_polling()
