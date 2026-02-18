@@ -13,7 +13,12 @@ dependencies = ["pydantic>=2.11.0"]
 telegram = ["pytelegrambotapi>=4.29.0"]
 postgres = ["psycopg[binary]>=3.2.0", "yoyo-migrations==9.0.0"]
 redis = ["redis>=6.0.0"]
-all = ["bot-framework[telegram,postgres,redis]"]
+all = ["bot-framework[telegram,facebook,postgres,redis]"]
+facebook = [
+    "fastapi>=0.129.0",
+    "httpx>=0.28.1",
+    "uvicorn>=0.40.0",
+]
 
 [dependency-groups]
 dev = [
