@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from logging import getLogger
 from typing import TYPE_CHECKING
 
@@ -34,12 +35,14 @@ class StaffReplyHandler:
         phrase_repo: IPhraseRepo,
         support_chat_id: int,
         support_topic_repo: ISupportTopicRepo,
+        on_staff_reply: Callable[[int], None] | None = None,
     ) -> None:
         self._thread_message_sender = thread_message_sender
         self._user_repo = user_repo
         self._phrase_repo = phrase_repo
         self._support_chat_id = support_chat_id
         self._support_topic_repo = support_topic_repo
+        self._on_staff_reply = on_staff_reply
         self._logger = getLogger(__name__)
 
     def handle(self, message: BotMessage) -> None:
@@ -75,6 +78,12 @@ class StaffReplyHandler:
             return
 
         self._send_to_user(user, text)
+
+        if self._on_staff_reply:
+            try:
+                self._on_staff_reply(user.id)
+            except Exception as er:
+                self._logger.error("on_staff_reply callback failed", exc_info=er)
 
     def _send_to_user(self, user: User, text: str) -> None:
         try:

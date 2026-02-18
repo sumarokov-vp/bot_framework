@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -60,6 +61,7 @@ class BotApplication:
         support_chat_id: int | None = None,
         support_bot_name: str = "",
         support_topic_format: str | None = None,
+        on_staff_reply: Callable[[int], None] | None = None,
     ) -> None:
         if auto_migrate:
             from bot_framework.app.migrations import apply_migrations
@@ -90,6 +92,7 @@ class BotApplication:
                 support_chat_id,
                 bot_name=support_bot_name,
                 topic_name_format=support_topic_format,
+                on_staff_reply=on_staff_reply,
             )
 
         self._setup_menus(redis_url)
@@ -99,6 +102,7 @@ class BotApplication:
         support_chat_id: int,
         bot_name: str,
         topic_name_format: str | None,
+        on_staff_reply: Callable[[int], None] | None = None,
     ) -> None:
         from bot_framework.domain.support_chat.repos import SupportTopicRepo
         from bot_framework.domain.support_chat.services import SupportTopicManager
@@ -160,6 +164,7 @@ class BotApplication:
             phrase_repo=self.phrase_provider,
             support_chat_id=support_chat_id,
             support_topic_repo=support_topic_repo,
+            on_staff_reply=on_staff_reply,
         )
         self.core.message_handler_registry.register(
             handler=staff_handler,
