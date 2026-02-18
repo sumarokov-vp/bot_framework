@@ -41,6 +41,9 @@ if TYPE_CHECKING:
     from bot_framework.core.protocols.i_support_topic_manager import (
         ISupportTopicManager,
     )
+    from bot_framework.features.flows.request_role_flow.protocols import (
+        IRequestRoleFlowRouter,
+    )
 
 
 class BotApplication:
@@ -331,6 +334,10 @@ class BotApplication:
     @property
     def close_handler(self) -> CloseCallbackHandler:
         return self._close_handler
+
+    @property
+    def request_role_flow_router(self) -> IRequestRoleFlowRouter:
+        return self._start_command_handler.request_role_flow_router
 
     def run(self) -> None:
         self.core.polling_bot.infinity_polling()
