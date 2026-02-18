@@ -1,234 +1,14 @@
 # Bot Framework
 
-Reusable Python library for building Telegram bots with Clean Architecture principles.
+Переиспользуемая Python-библиотека для создания Telegram-ботов с Clean Architecture.
 
-## Installation
+## Установка
 
 ```bash
-# Basic installation
-pip install bot-framework
-
-# With Telegram support
-pip install bot-framework[telegram]
-
-# With all optional dependencies
 pip install bot-framework[all]
 ```
 
-## Features
-
-- **Clean Architecture** - Layered architecture with import-linter enforcement
-- **Telegram Integration** - Ready-to-use services for pyTelegramBotAPI
-- **Step Flow** - Declarative multi-step flows with ordered steps
-- **Flow Management** - Dialog flow stack management with Redis storage
-- **Role Management** - User roles and permissions
-- **Language Management** - Multilingual phrase support
-- **Request Role Flow** - Pre-built flow for role requests
-
-## Quick Start
-
-```python
-from bot_framework import Button, Keyboard
-from bot_framework.app import BotApplication
-
-app = BotApplication(
-    bot_token="YOUR_BOT_TOKEN",
-    database_url="postgres://user:pass@localhost/dbname",
-    redis_url="redis://localhost:6379/0",
-)
-
-# Use individual message protocols
-keyboard = Keyboard(rows=[
-    [Button(text="Option 1", callback_data="opt1")],
-    [Button(text="Option 2", callback_data="opt2")],
-])
-
-# Send new message
-app.message_sender.send(chat_id=123, text="Choose an option:", keyboard=keyboard)
-
-# Replace existing message
-app.message_replacer.replace(chat_id=123, message_id=456, text="Updated text")
-
-# Delete message
-app.message_deleter.delete(chat_id=123, message_id=456)
-```
-
-## Message Protocols
-
-Bot Framework follows Interface Segregation Principle with separate protocols for each operation:
-
-| Protocol | Method | Description |
-|----------|--------|-------------|
-| `IMessageSender` | `send()`, `send_markdown_as_html()` | Send new messages |
-| `IMessageReplacer` | `replace()` | Edit existing message |
-| `IMessageDeleter` | `delete()` | Delete message |
-| `IDocumentSender` | `send_document()` | Send a file |
-| `IDocumentDownloader` | `download_document()` | Download a file |
-| `INotifyReplacer` | `notify_replace()` | Delete old message and send new one |
-
-### Using in your handlers
-
-Use specific protocols for dependency injection:
-
-```python
-from bot_framework.protocols import IMessageSender, IMessageReplacer
-
-class MyHandler:
-    def __init__(
-        self,
-        message_sender: IMessageSender,
-        message_replacer: IMessageReplacer,
-    ) -> None:
-        self.message_sender = message_sender
-        self.message_replacer = message_replacer
-
-    def handle(self, chat_id: int) -> None:
-        self.message_sender.send(chat_id=chat_id, text="Hello!")
-```
-
-### Available via BotApplication
-
-```python
-app.message_sender      # IMessageSender
-app.message_replacer    # IMessageReplacer
-app.message_deleter     # IMessageDeleter
-app.document_sender     # IDocumentSender
-```
-
-## Bot Commands
-
-Set up bot commands in BotFather using `/setcommands`. Copy and paste the following:
-
-```
-start - Start the bot
-request_role - Request a role
-language - Change language
-```
-
-This enables command autocompletion in Telegram when users type `/`.
-
-## Main Menu
-
-The main menu is shown when user sends `/start` command. By default, the menu has no buttons — you add them from your application.
-
-### Adding buttons
-
-Use `add_main_menu_button()` to add buttons to the main menu. Buttons are added in reverse order (first added appears last):
-
-```python
-from bot_framework.app import BotApplication
-from bot_framework.protocols.i_callback_handler import ICallbackHandler
-
-class OrdersHandler(ICallbackHandler):
-    callback_data = "orders"
-
-    def handle(self, callback: BotCallback) -> None:
-        # Handle button press
-        ...
-
-app = BotApplication(
-    bot_token="YOUR_BOT_TOKEN",
-    database_url="postgres://user:pass@localhost/dbname",
-    redis_url="redis://localhost:6379/0",
-    phrases_json_path=Path("data/phrases.json"),
-)
-
-orders_handler = OrdersHandler()
-app.callback_handler_registry.register(orders_handler)
-
-# Add button to main menu
-app.add_main_menu_button("mybot.orders", orders_handler)
-```
-
-Add phrase for the button in `data/phrases.json`:
-
-```json
-{
-  "mybot.orders": {
-    "ru": "📦 Мои заказы",
-    "en": "📦 My Orders"
-  }
-}
-```
-
-### Restricting /start access
-
-By default, `/start` is available to all users. You can restrict access to specific roles:
-
-```python
-# Only users with "admin" or "manager" role can use /start
-app.set_start_allowed_roles({"admin", "manager"})
-```
-
-Users without required roles will be redirected to the role request flow when trying to use `/start`.
-
-**Important:** This is typically used for internal bots where access should be limited. For public bots, leave this unrestricted (don't call `set_start_allowed_roles`).
-
-## Database Migrations
-
-Bot Framework includes built-in database migrations using yoyo-migrations. Migrations are applied automatically when creating a `BotApplication` instance.
-
-### Automatic migrations (default)
-
-```python
-from bot_framework.app import BotApplication
-
-# Migrations are applied automatically
-app = BotApplication(
-    bot_token="YOUR_BOT_TOKEN",
-    database_url="postgres://user:pass@localhost/dbname",
-    redis_url="redis://localhost:6379/0",
-)
-```
-
-### Disable automatic migrations
-
-```python
-app = BotApplication(
-    bot_token="YOUR_BOT_TOKEN",
-    database_url="postgres://user:pass@localhost/dbname",
-    redis_url="redis://localhost:6379/0",
-    auto_migrate=False,  # Disable automatic migrations
-)
-```
-
-### Manual migration
-
-```python
-from bot_framework.migrations import apply_migrations
-
-# Returns number of applied migrations
-applied_count = apply_migrations("postgres://user:pass@localhost/dbname")
-```
-
-### Created tables
-
-- `languages` - Supported languages (en, ru by default)
-- `roles` - User roles (user, supervisors by default)
-- `users` - Bot users
-- `phrases` - Multilingual phrases
-- `user_roles` - User-role associations
-
-## Configuration
-
-Bot Framework uses JSON files to configure roles, phrases, and languages. The library provides default values, and you can extend them with your own configuration files.
-
-### Roles
-
-Roles define user permissions in your bot. The library includes two base roles: `user` (default for all users) and `supervisors` (role approvers).
-
-**Add custom roles** by creating `data/roles.json` in your project:
-
-```json
-{
-  "roles": [
-    {"name": "admin", "description": "Administrator with full access"},
-    {"name": "moderator", "description": "Content moderator"}
-  ]
-}
-```
-
-Pass the path to `BotApplication`:
+## Быстрый старт
 
 ```python
 from pathlib import Path
@@ -239,325 +19,504 @@ app = BotApplication(
     database_url="postgres://user:pass@localhost/dbname",
     redis_url="redis://localhost:6379/0",
     roles_json_path=Path("data/roles.json"),
-)
-```
-
-Roles are synced to the database on startup using `INSERT ... ON CONFLICT DO NOTHING`, so it's safe to run multiple times.
-
-**Using roles in handlers:**
-
-```python
-class AdminOnlyHandler:
-    def __init__(self):
-        self.allowed_roles: set[str] | None = {"admin"}
-```
-
-### Phrases
-
-Phrases provide multilingual text for your bot. Each phrase has a hierarchical key and translations for each supported language.
-
-**Add custom phrases** by creating `data/phrases.json`:
-
-```json
-{
-  "mybot.greeting": {
-    "ru": "Привет! Я ваш помощник.",
-    "en": "Hello! I'm your assistant."
-  },
-  "mybot.help.title": {
-    "ru": "Справка",
-    "en": "Help"
-  },
-  "mybot.errors.not_found": {
-    "ru": "Не найдено",
-    "en": "Not found"
-  }
-}
-```
-
-Pass the path to `BotApplication`:
-
-```python
-app = BotApplication(
-    bot_token="YOUR_BOT_TOKEN",
-    database_url="postgres://user:pass@localhost/dbname",
-    redis_url="redis://localhost:6379/0",
     phrases_json_path=Path("data/phrases.json"),
-)
-```
-
-**Using phrases:**
-
-```python
-# Get phrase for user's language
-text = app.phrase_provider.get("mybot.greeting", language_code="ru")
-```
-
-**Key naming convention:** Use dot-separated hierarchical keys like `module.context.action` (e.g., `orders.validation.empty_cart`).
-
-### Languages
-
-Languages define which translations are available. The library includes English and Russian by default.
-
-**Add custom languages** by creating `data/languages.json`:
-
-```json
-{
-  "languages": [
-    {"code": "ru", "name": "Russian", "native_name": "Русский"},
-    {"code": "en", "name": "English", "native_name": "English"},
-    {"code": "es", "name": "Spanish", "native_name": "Español"}
-  ],
-  "default_language": "en"
-}
-```
-
-Pass the path to `BotApplication`:
-
-```python
-app = BotApplication(
-    bot_token="YOUR_BOT_TOKEN",
-    database_url="postgres://user:pass@localhost/dbname",
-    redis_url="redis://localhost:6379/0",
-    languages_json_path=Path("data/languages.json"),
-)
-```
-
-### Full configuration example
-
-```python
-from pathlib import Path
-from bot_framework.app import BotApplication
-
-app = BotApplication(
-    bot_token="YOUR_BOT_TOKEN",
-    database_url="postgres://user:pass@localhost/dbname",
-    redis_url="redis://localhost:6379/0",
-    roles_json_path=Path("data/roles.json"),
-    phrases_json_path=Path("data/phrases.json"),
-    languages_json_path=Path("data/languages.json"),
 )
 
 app.run()
 ```
 
-**Project structure:**
+## Полный пример: flow с шагами, check_roles и factory
+
+Типичная структура flow:
 
 ```
-my_bot/
-├── data/
-│   ├── roles.json
-│   ├── phrases.json
-│   └── languages.json
+src/flows/registration_flow/
+├── factory.py                          # Сборка зависимостей, создание Flow
 ├── handlers/
-│   └── ...
-└── main.py
+│   ├── start_registration_handler.py   # Запуск flow
+│   └── name_input_handler.py           # Приём имени → state → flow.route()
+├── steps/
+│   ├── ask_name_step.py                # Проверяет state.name → вызывает presenter
+│   └── ask_email_step.py               # Проверяет state.email → вызывает presenter
+├── presenters/
+│   ├── ask_name_presenter.py           # Отправка вопроса "Как вас зовут?"
+│   ├── ask_email_presenter.py          # Отправка вопроса "Ваш email?"
+│   └── confirm_presenter.py            # Финальное подтверждение
+├── entities/
+│   └── registration_state.py           # Состояние flow
+└── repos/
+    └── redis_registration_state_storage.py
 ```
 
-## Step Flow
+### Принцип работы
 
-Step Flow allows you to build multi-step user flows declaratively. Each step is a separate class that defines its completion condition and action.
-
-### Creating a Step
-
-```python
-from bot_framework.entities.user import User
-from bot_framework.step_flow import BaseStep
-
-from myapp.entities import MyFlowState
-from myapp.protocols import IMyQuestionSender
-
-
-class AskNameStep(BaseStep[MyFlowState]):
-    name = "ask_name"
-
-    def __init__(self, sender: IMyQuestionSender) -> None:
-        self.sender = sender
-
-    def execute(self, user: User, state: MyFlowState) -> bool:
-        # Check if step is already completed
-        if state.name is not None:
-            return True  # Continue to next step
-
-        # Step not completed - send message to user
-        self.sender.send(user)
-        return False  # Stop here, wait for user response
+```
+Handler → записывает данные в State → вызывает flow.route(user)
+Flow    → итерирует Steps по порядку
+Step    → проверяет State → если не заполнено, вызывает Presenter → stop
+                           → если заполнено, return True → next step
 ```
 
-The `execute()` method returns:
-- `True` - step is completed, continue to next step
-- `False` - step sent a message, stop and wait for user response
+- **Handler** не знает о presenters — только пишет в state и вызывает `flow.route()`
+- **Step** проверяет своё поле в state и вызывает presenter при необходимости
+- **Flow** задаёт порядок шагов и вызывает `on_complete` когда все шаги пройдены
 
-### Creating a Flow
-
-```python
-from bot_framework.step_flow import Flow
-
-from myapp.entities import MyFlowState
-from myapp.steps import AskNameStep, AskEmailStep, AskPhoneStep
-
-
-# Create flow
-flow = Flow[MyFlowState](
-    name="registration",
-    state_factory=lambda user_id: MyFlowState(user_id=user_id),
-    state_storage=my_state_storage,
-)
-
-# Add steps in order
-flow.add_step(AskNameStep(sender=name_sender))
-flow.add_step(AskEmailStep(sender=email_sender))
-flow.add_step(AskPhoneStep(sender=phone_sender))
-
-# Callback when all steps completed
-flow.on_complete(lambda user, state: show_confirmation(user, state))
-```
-
-### Step Order Management
+### 1. State — состояние flow
 
 ```python
-# Add step at specific position
-flow.insert_step(1, AskMiddleNameStep(sender=...))
-
-# Move step to different position
-flow.move_step("ask_email", to_index=0)
-
-# Remove step
-flow.remove_step("ask_phone")
-```
-
-### Using Flow in Handlers
-
-```python
-class NameInputHandler:
-    def __init__(self, state_storage: IMyStateStorage) -> None:
-        self.state_storage = state_storage
-        self.flow: Flow[MyFlowState] | None = None
-
-    def set_flow(self, flow: Flow[MyFlowState]) -> None:
-        self.flow = flow
-
-    def handle(self, message: BotMessage) -> None:
-        state = self.state_storage.get(message.from_user.id)
-        state.name = message.text
-        self.state_storage.save(state)
-
-        # Continue to next step
-        if self.flow:
-            user = self.user_repo.get_by_id(message.from_user.id)
-            self.flow.route(user)
-```
-
-### Starting a Flow
-
-```python
-# Start flow for user
-flow.start(user, source_message)
-```
-
-### State Storage Protocol
-
-Implement `IStepStateStorage` for your state:
-
-```python
-from bot_framework.step_flow.protocols import IStepStateStorage
-
-
-class RedisMyStateStorage(IStepStateStorage[MyFlowState]):
-    def get(self, user_id: int) -> MyFlowState | None:
-        ...
-
-    def save(self, state: MyFlowState) -> None:
-        ...
-
-    def delete(self, user_id: int) -> None:
-        ...
-```
-
-### Complete Example
-
-```python
-# entities/my_flow_state.py
+# entities/registration_state.py
 from pydantic import BaseModel
 
 
-class MyFlowState(BaseModel):
+class RegistrationState(BaseModel):
     user_id: int
     name: str | None = None
     email: str | None = None
-    confirmed: bool = False
+```
 
+### 2. Steps — шаги flow
 
+Каждый шаг наследует `BaseStep`. Метод `execute()` возвращает:
+- `True` — шаг завершён, перейти к следующему
+- `False` — шаг отправил сообщение пользователю (через presenter), ждём ответа
+
+```python
 # steps/ask_name_step.py
-from bot_framework.step_flow import BaseStep
+from bot_framework.domain.flow_management.step_flow import BaseStep
+from bot_framework import User
+
+from ..presenters import AskNamePresenter
+from ..entities import RegistrationState
 
 
-class AskNameStep(BaseStep[MyFlowState]):
+class AskNameStep(BaseStep[RegistrationState]):
     name = "ask_name"
 
-    def __init__(self, sender: IAskNameSender) -> None:
-        self.sender = sender
+    def __init__(self, presenter: AskNamePresenter) -> None:
+        self._presenter = presenter
 
-    def execute(self, user: User, state: MyFlowState) -> bool:
+    def execute(self, user: User, state: RegistrationState) -> bool:
         if state.name is not None:
-            return True
-        self.sender.send(user)
-        return False
+            return True  # поле заполнено — следующий шаг
+        self._presenter.send(chat_id=user.id, language_code=user.language_code)
+        return False  # ждём ввода от пользователя
+```
+
+### 3. Presenters — отображение
+
+Presenter формирует и отправляет сообщение. Не знает о шагах и handlers:
+
+```python
+# presenters/ask_name_presenter.py
+from bot_framework import IMessageSender
+from bot_framework.domain.language_management.repos.protocols import IPhraseRepo
 
 
-# factory.py
-flow = Flow[MyFlowState](
+class AskNamePresenter:
+    def __init__(
+        self,
+        message_sender: IMessageSender,
+        phrase_repo: IPhraseRepo,
+    ) -> None:
+        self._message_sender = message_sender
+        self._phrase_repo = phrase_repo
+
+    def send(self, chat_id: int, language_code: str) -> None:
+        text = self._phrase_repo.get_phrase(
+            key="registration.ask_name",
+            language_code=language_code,
+        )
+        self._message_sender.send(chat_id=chat_id, text=text)
+```
+
+### 4. Handlers — обработка ввода пользователя
+
+Handler получает данные от пользователя, записывает в state и вызывает `flow.route(user)`. Handler **не вызывает** presenters и не знает о шагах — только пишет данные и передаёт управление flow.
+
+Каждый handler использует декоратор `@check_roles` (callback) или `@check_message_roles` (message).
+
+**Message handler** (текстовый ввод):
+
+```python
+# handlers/name_input_handler.py
+from bot_framework import BotMessage, check_message_roles
+from bot_framework.domain.flow_management.step_flow import Flow
+from bot_framework.domain.role_management.repos.protocols import IRoleRepo, IUserRepo
+
+from ..entities import RegistrationState
+
+
+class NameInputHandler:
+    def __init__(
+        self,
+        role_repo: IRoleRepo,
+        user_repo: IUserRepo,
+        state_storage: "IStepStateStorage[RegistrationState]",
+    ) -> None:
+        self.role_repo = role_repo
+        self.allowed_roles: set[str] | None = None  # None = доступно всем
+        self._user_repo = user_repo
+        self._state_storage = state_storage
+        self.flow: Flow[RegistrationState] | None = None
+
+    @check_message_roles
+    def handle(self, message: BotMessage) -> None:
+        if not message.from_user:
+            return
+
+        state = self._state_storage.get(message.from_user.id)
+        if state is None:
+            return
+
+        # Только записываем данные в state
+        state.name = message.text
+        self._state_storage.save(state)
+
+        # Передаём управление flow — он сам вызовет нужный step/presenter
+        if self.flow:
+            user = self._user_repo.get_by_id(message.from_user.id)
+            self.flow.route(user)
+```
+
+**Callback handler** (запуск flow по кнопке):
+
+```python
+# handlers/start_registration_handler.py
+from uuid import uuid4
+
+from bot_framework import BotCallback, ICallbackAnswerer, check_roles
+from bot_framework.domain.flow_management.step_flow import Flow
+from bot_framework.domain.role_management.repos.protocols import IRoleRepo, IUserRepo
+
+from ..entities import RegistrationState
+
+
+class StartRegistrationHandler:
+    def __init__(
+        self,
+        callback_answerer: ICallbackAnswerer,
+        role_repo: IRoleRepo,
+        user_repo: IUserRepo,
+    ) -> None:
+        self.callback_answerer = callback_answerer
+        self.role_repo = role_repo
+        self.allowed_roles: set[str] | None = None
+        self._user_repo = user_repo
+        self.flow: Flow[RegistrationState] | None = None
+        self.prefix = uuid4().hex
+
+    @check_roles
+    def handle(self, callback: BotCallback) -> None:
+        self.callback_answerer.answer(callback_query_id=callback.id)
+        user = self._user_repo.get_by_id(callback.user_id)
+        if self.flow:
+            self.flow.start(user, source_message=callback.message)
+```
+
+### 5. Flow — сборка шагов
+
+`Flow` задаёт порядок шагов и действие по завершении. Внутри `flow.route(user)` итерирует шаги по порядку — каждый шаг проверяет своё поле в state:
+
+```python
+from bot_framework.domain.flow_management.step_flow import Flow
+
+flow = Flow[RegistrationState](
     name="registration",
-    state_factory=lambda uid: MyFlowState(user_id=uid),
-    state_storage=redis_storage,
+    state_factory=lambda user_id: RegistrationState(user_id=user_id),
+    state_storage=state_storage,
 )
 
-flow.add_step(AskNameStep(sender=name_sender))
-flow.add_step(AskEmailStep(sender=email_sender))
-flow.on_complete(lambda user, state: confirm_sender.send(user, state))
-
-# Connect handlers to flow
-name_handler.set_flow(flow)
-email_handler.set_flow(flow)
+flow.add_step(AskNameStep(presenter=ask_name_presenter))    # 1. Имя
+flow.add_step(AskEmailStep(presenter=ask_email_presenter))  # 2. Email
+flow.on_complete(lambda user, state: confirm_presenter.send(user, state))
 ```
+
+### 6. Factory — сборка всех компонентов
+
+Factory создаёт presenters, steps, flow и handlers. Связывает handlers с flow:
+
+```python
+# factory.py
+from bot_framework import (
+    ICallbackAnswerer,
+    ICallbackHandlerRegistry,
+    IMessageHandlerRegistry,
+    IMessageSender,
+)
+from bot_framework.domain.language_management.repos.protocols import IPhraseRepo
+from bot_framework.domain.role_management.repos.protocols import IRoleRepo, IUserRepo
+from bot_framework.domain.flow_management.step_flow import Flow, IStepStateStorage
+
+from .steps import AskNameStep, AskEmailStep
+from .handlers import StartRegistrationHandler, NameInputHandler
+from .presenters import AskNamePresenter, AskEmailPresenter, ConfirmPresenter
+from .entities import RegistrationState
+
+
+class RegistrationFlowFactory:
+    def __init__(
+        self,
+        callback_answerer: ICallbackAnswerer,
+        message_sender: IMessageSender,
+        phrase_repo: IPhraseRepo,
+        role_repo: IRoleRepo,
+        user_repo: IUserRepo,
+        state_storage: IStepStateStorage[RegistrationState],
+    ) -> None:
+        self._callback_answerer = callback_answerer
+        self._message_sender = message_sender
+        self._phrase_repo = phrase_repo
+        self._role_repo = role_repo
+        self._user_repo = user_repo
+        self._state_storage = state_storage
+
+        self._flow: Flow[RegistrationState] | None = None
+        self._start_handler: StartRegistrationHandler | None = None
+        self._name_handler: NameInputHandler | None = None
+
+    def _get_flow(self) -> Flow[RegistrationState]:
+        if self._flow is not None:
+            return self._flow
+
+        ask_name_presenter = AskNamePresenter(
+            message_sender=self._message_sender,
+            phrase_repo=self._phrase_repo,
+        )
+        ask_email_presenter = AskEmailPresenter(
+            message_sender=self._message_sender,
+            phrase_repo=self._phrase_repo,
+        )
+        confirm_presenter = ConfirmPresenter(
+            message_sender=self._message_sender,
+            phrase_repo=self._phrase_repo,
+        )
+
+        self._flow = Flow[RegistrationState](
+            name="registration",
+            state_factory=lambda uid: RegistrationState(user_id=uid),
+            state_storage=self._state_storage,
+        )
+        self._flow.add_step(AskNameStep(presenter=ask_name_presenter))
+        self._flow.add_step(AskEmailStep(presenter=ask_email_presenter))
+        self._flow.on_complete(
+            lambda user, state: confirm_presenter.send(user, state)
+        )
+
+        return self._flow
+
+    def _get_start_handler(self) -> StartRegistrationHandler:
+        if self._start_handler is None:
+            self._start_handler = StartRegistrationHandler(
+                callback_answerer=self._callback_answerer,
+                role_repo=self._role_repo,
+                user_repo=self._user_repo,
+            )
+            self._start_handler.flow = self._get_flow()
+        return self._start_handler
+
+    def _get_name_handler(self) -> NameInputHandler:
+        if self._name_handler is None:
+            self._name_handler = NameInputHandler(
+                role_repo=self._role_repo,
+                user_repo=self._user_repo,
+                state_storage=self._state_storage,
+            )
+            self._name_handler.flow = self._get_flow()
+        return self._name_handler
+
+    def register_handlers(
+        self,
+        callback_registry: ICallbackHandlerRegistry,
+        message_registry: IMessageHandlerRegistry,
+    ) -> None:
+        callback_registry.register(self._get_start_handler())
+        # Регистрация message handlers для текстового ввода
+        # message_registry.register(self._get_name_handler(), ...)
+```
+
+### 7. Подключение к BotApplication
+
+```python
+from pathlib import Path
+from bot_framework.app import BotApplication
+
+app = BotApplication(
+    bot_token="YOUR_BOT_TOKEN",
+    database_url="postgres://user:pass@localhost/dbname",
+    redis_url="redis://localhost:6379/0",
+    phrases_json_path=Path("data/phrases.json"),
+)
+
+factory = RegistrationFlowFactory(
+    callback_answerer=app.callback_answerer,
+    message_sender=app.message_sender,
+    phrase_repo=app.phrase_repo,
+    role_repo=app.role_repo,
+    user_repo=app.user_repo,
+    state_storage=RedisRegistrationStateStorage(redis_url="redis://localhost:6379/0"),
+)
+
+factory.register_handlers(
+    callback_registry=app.callback_handler_registry,
+    message_registry=app.core.message_handler_registry,
+)
+
+app.run()
+```
+
+## Flow Stack
+
+### Когда нужен Flow Stack
+
+Один flow — это **линейная** цепочка шагов: шаг 1 → шаг 2 → шаг 3 → завершение. Каждый шаг проверяет одно поле в state и вызывает один presenter.
+
+Но если на каком-то шаге возникает **ответвление** — например, на шаге «выбор адреса» пользователь нажимает «Добавить новый адрес», и это требует отдельной цепочки шагов (город → улица → дом → квартира) — линейный flow это не покрывает.
+
+В этом случае ответвление оформляется как **отдельный flow**, и flow соединяются через **Flow Stack**:
+
+```
+Registration Flow (шаг 1 → шаг 2 → шаг 3)
+                              ↓ push("add_address")
+                    Add Address Flow (город → улица → дом)
+                              ↓ pop_and_return()
+                    ← возврат в Registration Flow на шаг 3
+```
+
+Flow Stack работает как стек вызовов функций: `push` — входим в дочерний flow, `pop_and_return` — завершаем его и возвращаемся в родительский.
+
+### Правило
+
+- **Один flow = одна линейная цепочка шагов** (без ветвлений)
+- Как только появляется ответвление — выносим его в отдельный flow
+- Flow Stack соединяет flow между собой с возможностью возврата
+
+### API
+
+```python
+from bot_framework.domain.flow_management.services import FlowStackNavigator
+from bot_framework.domain.flow_management import FlowRegistry
+
+# Регистрация flow в реестре
+registry = FlowRegistry()
+registry.register("registration", registration_flow_router)
+registry.register("add_address", add_address_flow_router)
+
+# Навигация
+navigator = FlowStackNavigator(
+    storage=redis_flow_stack_storage,
+    registry=registry,
+    validator=flow_stack_validator,
+)
+
+# Войти в дочерний flow (добавить в стек)
+navigator.push(user, "add_address")
+
+# Завершить текущий flow и вернуться к родительскому
+navigator.pop_and_return(user)
+
+# Завершить текущий flow без возврата
+navigator.terminate(user)
+
+# Очистить весь стек (например, при /start)
+navigator.clear_all(user)
+```
+
+## Декораторы check_roles
+
+Ограничение доступа к handler по ролям пользователя. Декоратор обязателен для каждого handler.
+
+### @check_roles — для callback-обработчиков
+
+```python
+from bot_framework import BotCallback, check_roles
+
+class MyHandler:
+    def __init__(self, role_repo: IRoleRepo, callback_answerer: ICallbackAnswerer):
+        self.role_repo = role_repo                    # обязательно
+        self.callback_answerer = callback_answerer     # опционально — показывает alert
+        self.allowed_roles: set[str] = {"admin"}       # None = доступно всем
+
+    @check_roles
+    def handle(self, callback: BotCallback) -> None:
+        ...
+```
+
+### @check_message_roles — для message-обработчиков
+
+```python
+from bot_framework import BotMessage, check_message_roles
+
+class MyHandler:
+    def __init__(self, role_repo: IRoleRepo, message_sender: IMessageSender):
+        self.role_repo = role_repo                # обязательно
+        self.message_sender = message_sender       # опционально — отправляет ошибку
+        self.allowed_roles: set[str] = {"manager"} # None = доступно всем
+
+    @check_message_roles
+    def handle(self, message: BotMessage) -> None:
+        ...
+```
+
+## Конфигурация
+
+### Роли (`data/roles.json`)
+
+```json
+{
+  "roles": [
+    {"name": "admin", "description": "Администратор"},
+    {"name": "manager", "description": "Менеджер"}
+  ]
+}
+```
+
+### Фразы (`data/phrases.json`)
+
+```json
+{
+  "mybot.greeting": {
+    "ru": "Привет!",
+    "en": "Hello!"
+  }
+}
+```
+
+### Кнопки главного меню
+
+```python
+app.add_main_menu_button("mybot.orders", orders_handler)
+```
+
+### Ограничение /start по ролям
+
+```python
+app.set_start_allowed_roles({"admin", "manager"})
+```
+
+## Протоколы сообщений
+
+| Протокол | Метод | Описание |
+|----------|-------|----------|
+| `IMessageSender` | `send()` | Отправка сообщения |
+| `IMessageReplacer` | `replace()` | Редактирование сообщения |
+| `IMessageDeleter` | `delete()` | Удаление сообщения |
+| `IDocumentSender` | `send_document()` | Отправка файла |
+| `ICallbackAnswerer` | `answer()` | Ответ на callback query |
 
 ## Support Chat
 
-Support Chat mirrors user conversations into a Telegram supergroup with forum topics, allowing staff to monitor and reply to users directly.
-
-### How it works
-
-- **User messages** are forwarded to a dedicated topic in the support chat
-- **Bot replies** are mirrored as text copies in the topic
-- **Staff replies** in a topic are sent to the user with a "👤 Сотрудник:" prefix
-
-### Setup
-
-1. Create a Telegram supergroup and enable **Topics** (Group Settings → Topics)
-2. Add your bot as admin with **Manage Topics** permission
-3. Pass the chat ID when creating `BotApplication`:
+Зеркалирование переписки с пользователем в Telegram-супергруппу с топиками.
 
 ```python
 app = BotApplication(
     bot_token="YOUR_BOT_TOKEN",
     database_url="postgres://user:pass@localhost/dbname",
     redis_url="redis://localhost:6379/0",
-    support_chat_id=-1001234567890,  # Supergroup with forum topics
+    support_chat_id=-1001234567890,
 )
 ```
 
-### Limitations
-
-- Maximum 1000 topics per supergroup (Telegram limit)
-- Topic names are limited to 128 characters
-- Bot must be an admin with `can_manage_topics` permission
-
-## Optional Dependencies
-
-- `telegram` - pyTelegramBotAPI for Telegram bot integration
-- `postgres` - psycopg and yoyo-migrations for PostgreSQL database support
-- `redis` - Redis for caching and flow state management
-- `all` - All optional dependencies
+Требования: супергруппа с включёнными Topics, бот — админ с правом Manage Topics.
 
 ## License
 
