@@ -24,7 +24,7 @@ from .i_message_handler_registrar_bot import IMessageHandlerRegistrarBot
 from .i_message_handler_registry import IMessageHandlerRegistry
 from .i_message_replacer import IMessageReplacer
 from .i_message_sender import IMessageSender
-from .i_message_sender_bot import IMessageSenderBot
+
 from .i_middleware import IMiddleware
 from .i_middleware_setup import IMiddlewareSetup
 from .i_next_step_handler_registrar import INextStepHandlerRegistrar
@@ -58,7 +58,7 @@ __all__ = [
     "IMessageHandlerRegistry",
     "IMessageReplacer",
     "IMessageSender",
-    "IMessageSenderBot",
+
     "IMiddleware",
     "IMiddlewareSetup",
     "INextStepHandlerRegistrar",
