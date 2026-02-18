@@ -31,13 +31,8 @@ class IUserRepo(
         language_code: str,
     ) -> None: ...
 
-    def find_by_support_topic_id(
-        self,
-        topic_id: int,
-    ) -> UserT | None: ...
-
-    def set_support_topic_id(
+    def set_phone_number(
         self,
         user_id: int,
-        topic_id: int,
+        phone_number: str,
     ) -> None: ...

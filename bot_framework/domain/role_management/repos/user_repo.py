@@ -88,8 +88,7 @@ class UserRepo(IUserRepo):
                         language_code,
                         is_bot,
                         is_premium,
-                        support_chat_id,
-                        support_topic_id,
+                        phone_number,
                         party_id
                     )
                     VALUES (
@@ -100,8 +99,7 @@ class UserRepo(IUserRepo):
                         %(language_code)s,
                         %(is_bot)s,
                         %(is_premium)s,
-                        %(support_chat_id)s,
-                        %(support_topic_id)s,
+                        %(phone_number)s,
                         %(party_id)s
                     )
                     RETURNING *
@@ -128,8 +126,7 @@ class UserRepo(IUserRepo):
                         language_code = %(language_code)s,
                         is_bot = %(is_bot)s,
                         is_premium = %(is_premium)s,
-                        support_chat_id = %(support_chat_id)s,
-                        support_topic_id = %(support_topic_id)s,
+                        phone_number = %(phone_number)s,
                         party_id = %(party_id)s,
                         updated_at = NOW()
                     WHERE id = %(id)s
@@ -174,20 +171,6 @@ class UserRepo(IUserRepo):
                     },
                 )
 
-    def find_by_support_topic_id(
-        self,
-        topic_id: int,
-    ) -> User | None:
-        with psycopg.connect(self.database_url) as conn:
-            with conn.cursor(row_factory=class_row(User)) as cur:
-                cur.execute(
-                    "SELECT * FROM users WHERE support_topic_id = %(topic_id)s",
-                    {
-                        "topic_id": topic_id,
-                    },
-                )
-                return cur.fetchone()
-
     def update_language(
         self,
         user_id: int,
@@ -207,21 +190,21 @@ class UserRepo(IUserRepo):
                     },
                 )
 
-    def set_support_topic_id(
+    def set_phone_number(
         self,
         user_id: int,
-        topic_id: int,
+        phone_number: str,
     ) -> None:
         with psycopg.connect(self.database_url) as conn:
             with conn.cursor() as cur:
                 cur.execute(
                     """
                     UPDATE users
-                    SET support_topic_id = %(topic_id)s
+                    SET phone_number = %(phone_number)s
                     WHERE id = %(user_id)s
                     """,
                     {
                         "user_id": user_id,
-                        "topic_id": topic_id,
+                        "phone_number": phone_number,
                     },
                 )

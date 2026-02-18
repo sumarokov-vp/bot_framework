@@ -38,6 +38,12 @@ if TYPE_CHECKING:
         IMessageSender,
         INextStepHandlerRegistrar,
     )
+    from bot_framework.core.protocols.i_support_topic_manager import (
+        ISupportTopicManager,
+    )
+    from bot_framework.features.flows.request_role_flow.protocols import (
+        IRequestRoleFlowRouter,
+    )
 
 
 class BotApplication:
@@ -52,6 +58,8 @@ class BotApplication:
         use_class_middlewares: bool = True,
         auto_migrate: bool = True,
         support_chat_id: int | None = None,
+        support_bot_name: str = "",
+        support_topic_format: str | None = None,
     ) -> None:
         if auto_migrate:
             from bot_framework.app.migrations import apply_migrations
@@ -78,11 +86,21 @@ class BotApplication:
         self.phrase_repo = self.phrase_provider  # обратная совместимость
 
         if support_chat_id:
-            self._setup_support_chat(support_chat_id)
+            self._setup_support_chat(
+                support_chat_id,
+                bot_name=support_bot_name,
+                topic_name_format=support_topic_format,
+            )
 
         self._setup_menus(redis_url)
 
-    def _setup_support_chat(self, support_chat_id: int) -> None:
+    def _setup_support_chat(
+        self,
+        support_chat_id: int,
+        bot_name: str,
+        topic_name_format: str | None,
+    ) -> None:
+        from bot_framework.domain.support_chat.repos import SupportTopicRepo
         from bot_framework.domain.support_chat.services import SupportTopicManager
         from bot_framework.platform.telegram.handlers import StaffReplyHandler
         from bot_framework.platform.telegram.middleware import SupportChatMiddleware
@@ -92,15 +110,30 @@ class BotApplication:
         from bot_framework.platform.telegram.services.telegram_forum_topic_creator import (
             TelegramForumTopicCreator,
         )
+        from bot_framework.platform.telegram.services.telegram_forum_topic_editor import (
+            TelegramForumTopicEditor,
+        )
 
         forum_topic_creator = TelegramForumTopicCreator(
             raw_forum_topic_creator=self.core.raw_forum_topic_creator,
         )
-        topic_manager = SupportTopicManager(
-            support_chat_id=support_chat_id,
-            user_repo=self.user_repo,
-            forum_topic_creator=forum_topic_creator,
+        forum_topic_editor = TelegramForumTopicEditor(
+            raw_forum_topic_editor=self.core.raw_forum_topic_editor,
         )
+        support_topic_repo = SupportTopicRepo(database_url=self._database_url)
+
+        manager_kwargs: dict[str, object] = {
+            "support_chat_id": support_chat_id,
+            "user_repo": self.user_repo,
+            "forum_topic_creator": forum_topic_creator,
+            "forum_topic_editor": forum_topic_editor,
+            "support_topic_repo": support_topic_repo,
+            "bot_name": bot_name,
+        }
+        if topic_name_format:
+            manager_kwargs["topic_name_format"] = topic_name_format
+        topic_manager = SupportTopicManager(**manager_kwargs)  # type: ignore[arg-type]
+        self._support_topic_manager = topic_manager
 
         mirror = SupportMirrorMessenger(
             messenger=self.core.message_sender,
@@ -126,6 +159,7 @@ class BotApplication:
             user_repo=self.user_repo,
             phrase_repo=self.phrase_provider,
             support_chat_id=support_chat_id,
+            support_topic_repo=support_topic_repo,
         )
         self.core.message_handler_registry.register(
             handler=staff_handler,
@@ -294,8 +328,16 @@ class BotApplication:
         return self.core.next_step_registrar
 
     @property
+    def support_topic_manager(self) -> ISupportTopicManager | None:
+        return getattr(self, "_support_topic_manager", None)
+
+    @property
     def close_handler(self) -> CloseCallbackHandler:
         return self._close_handler
+
+    @property
+    def request_role_flow_router(self) -> IRequestRoleFlowRouter:
+        return self._start_command_handler.request_role_flow_router
 
     def run(self) -> None:
         self.core.polling_bot.infinity_polling()
