@@ -21,6 +21,9 @@ if TYPE_CHECKING:
     )
 
 
+ANONYMOUS_ADMIN_BOT_ID = 1087968824
+
+
 class StaffReplyHandler:
     allowed_roles: set[str] | None = None
 
@@ -45,7 +48,9 @@ class StaffReplyHandler:
             return
 
         from_user = original.from_user
-        if not from_user or from_user.is_bot:
+        if not from_user:
+            return
+        if from_user.is_bot and from_user.id != ANONYMOUS_ADMIN_BOT_ID:
             return
 
         thread_id = original.message_thread_id
