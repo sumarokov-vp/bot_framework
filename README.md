@@ -2,6 +2,8 @@
 
 Переиспользуемая Python-библиотека для создания Telegram-ботов с Clean Architecture.
 
+**Документация:** [botframework.smartist.dev](https://botframework.smartist.dev)
+
 ## Установка
 
 ```bash
