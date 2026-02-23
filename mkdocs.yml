@@ -1,0 +1,41 @@
+site_name: Bot Framework
+site_url: https://botframework.smartist.dev
+site_description: Переиспользуемая Python-библиотека для создания ботов с Clean Architecture
+
+theme:
+  name: material
+  language: ru
+  palette:
+    scheme: default
+    primary: indigo
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - toc:
+      permalink: true
+
+nav:
+  - Главная: index.md
+  - Концепции:
+      - Архитектура: concepts/architecture.md
+      - Жизненный цикл Flow: concepts/flow-lifecycle.md
+      - Flow Stack: concepts/flow-stack.md
+      - Роли и доступ: concepts/roles-and-access.md
+      - Мультиязычность: concepts/multilingual.md
+      - Support Chat: concepts/support-chat.md
+  - Примеры:
+      - Создание Flow: examples/creating-flow.md
+      - Конфигурация: examples/configuration.md
+      - Обработчики: examples/handlers.md
+  - Справочник:
+      - Протоколы: reference/protocols.md
+      - Декораторы: reference/decorators.md

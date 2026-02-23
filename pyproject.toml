@@ -23,6 +23,8 @@ facebook = [
 [dependency-groups]
 dev = [
     "import-linter>=2.9",
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.7.2",
     "mypy>=1.18.2",
     "pyright>=1.1.406",
     "pytest>=9.0.0",
