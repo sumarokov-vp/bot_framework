@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+from logging import getLogger
 from typing import Any
 
 import httpx
 
 GRAPH_API_BASE_URL = "https://graph.facebook.com/v21.0"
+
+logger = getLogger(__name__)
 
 
 class FacebookApiClient:
@@ -25,6 +28,10 @@ class FacebookApiClient:
                 "messaging_type": "RESPONSE",
             },
         )
+        if response.is_error:
+            logger.error(
+                "Facebook API error %s: %s", response.status_code, response.text,
+            )
         response.raise_for_status()
         return response.json()
 
