@@ -1,16 +1,31 @@
 # Bot Framework
 
-Переиспользуемая Python-библиотека для создания Telegram-ботов с Clean Architecture.
+Переиспользуемая Python-библиотека для создания ботов на любых платформах с Clean Architecture.
 
 **Документация:** [botframework.smartist.dev](https://botframework.smartist.dev)
+
+## Платформы
+
+| Платформа | Транспорт | Optional dependency |
+|-----------|-----------|---------------------|
+| **Telegram** | pyTelegramBotAPI (polling / webhooks) | `bot-framework[telegram]` |
+| **Facebook Messenger** | Webhooks (FastAPI + uvicorn) | `bot-framework[facebook]` |
+| **Max** (dev.max.ru) | Long polling (httpx) | `bot-framework[max]` |
+
+Бизнес-логика (flows, roles, phrases) не зависит от платформы — переключение между мессенджерами требует только замены `MessageCore`.
 
 ## Установка
 
 ```bash
-pip install bot-framework[all]
+pip install bot-framework[all]          # все платформы + postgres + redis
+pip install bot-framework[telegram]     # только Telegram
+pip install bot-framework[max]          # только Max
+pip install bot-framework[facebook]     # только Facebook
 ```
 
 ## Быстрый старт
+
+### Telegram
 
 ```python
 from pathlib import Path
@@ -25,6 +40,36 @@ app = BotApplication(
 )
 
 app.run()
+```
+
+### Max
+
+```python
+from bot_framework.platform.max import MaxMessageCore
+
+core = MaxMessageCore(token="YOUR_MAX_BOT_TOKEN")
+
+# Регистрация handlers — так же, как для Telegram
+core.callback_handler_registry.register(my_callback_handler)
+core.message_handler_registry.register(my_message_handler, commands=["start"])
+
+core.run()  # запускает long polling
+```
+
+### Facebook Messenger
+
+```python
+from bot_framework.platform.facebook import FacebookMessageCore
+
+core = FacebookMessageCore(
+    page_access_token="YOUR_PAGE_TOKEN",
+    verify_token="YOUR_VERIFY_TOKEN",
+)
+
+core.callback_handler_registry.register(my_callback_handler)
+core.message_handler_registry.register(my_message_handler, commands=["start"])
+
+core.run(host="0.0.0.0", port=8000)  # запускает webhook-сервер
 ```
 
 ## Полный пример: flow с шагами, check_roles и factory
@@ -505,7 +550,7 @@ app.set_start_allowed_roles({"admin", "manager"})
 | `IDocumentSender` | `send_document()` | Отправка файла |
 | `ICallbackAnswerer` | `answer()` | Ответ на callback query |
 
-## Support Chat
+## Support Chat (Telegram)
 
 Зеркалирование переписки с пользователем в Telegram-супергруппу с топиками.
 
