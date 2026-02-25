@@ -28,6 +28,7 @@ from bot_framework.features.menus.language_menu import LanguageMenuFactory
 from bot_framework.core.protocols.i_callback_handler import ICallbackHandler
 from bot_framework.domain.role_management.repos import RoleRepo, UserRepo
 from bot_framework.platform.telegram import CloseCallbackHandler, TelegramMessageCore
+from bot_framework.platform.max import MaxMessageCore
 
 if TYPE_CHECKING:
     from bot_framework.core.protocols import (
@@ -62,7 +63,10 @@ class BotApplication:
         support_bot_name: str = "",
         support_topic_format: str | None = None,
         on_staff_reply: Callable[[int], None] | None = None,
+        platform: str = "telegram",
     ) -> None:
+        self._platform = platform
+
         if auto_migrate:
             from bot_framework.app.migrations import apply_migrations
 
@@ -74,12 +78,19 @@ class BotApplication:
         self._validate_translations(languages_json_path, phrases_json_path)
 
         flow_message_storage = RedisFlowMessageStorage(redis_url=redis_url)
-        self.core = TelegramMessageCore(
-            bot_token=bot_token,
-            database_url=database_url,
-            flow_message_storage=flow_message_storage,
-            use_class_middlewares=use_class_middlewares,
-        )
+
+        if platform == "max":
+            self.core: TelegramMessageCore | MaxMessageCore = MaxMessageCore(
+                token=bot_token,
+                flow_message_storage=flow_message_storage,
+            )
+        else:
+            self.core = TelegramMessageCore(
+                bot_token=bot_token,
+                database_url=database_url,
+                flow_message_storage=flow_message_storage,
+                use_class_middlewares=use_class_middlewares,
+            )
 
         self._database_url = database_url
         self.user_repo = UserRepo(database_url=database_url)
@@ -88,6 +99,8 @@ class BotApplication:
         self.phrase_repo = self.phrase_provider  # обратная совместимость
 
         if support_chat_id:
+            if platform == "max":
+                raise NotImplementedError("Support chat is not supported for Max platform")
             self._setup_support_chat(
                 support_chat_id,
                 bot_name=support_bot_name,
@@ -104,6 +117,9 @@ class BotApplication:
         topic_name_format: str | None,
         on_staff_reply: Callable[[int], None] | None = None,
     ) -> None:
+        if not isinstance(self.core, TelegramMessageCore):
+            msg = "Support chat requires TelegramMessageCore"
+            raise TypeError(msg)
         from bot_framework.domain.support_chat.repos import SupportTopicRepo
         from bot_framework.domain.support_chat.services import SupportTopicManager
         from bot_framework.platform.telegram.handlers import StaffReplyHandler
@@ -330,6 +346,8 @@ class BotApplication:
 
     @property
     def next_step_registrar(self) -> INextStepHandlerRegistrar:
+        if not isinstance(self.core, TelegramMessageCore):
+            raise NotImplementedError("next_step_registrar is not supported for Max platform")
         return self.core.next_step_registrar
 
     @property
@@ -345,4 +363,7 @@ class BotApplication:
         return self._start_command_handler.request_role_flow_router
 
     def run(self) -> None:
-        self.core.polling_bot.infinity_polling()
+        if isinstance(self.core, MaxMessageCore):
+            self.core.run()
+        else:
+            self.core.polling_bot.infinity_polling()
