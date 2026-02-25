@@ -31,6 +31,21 @@ class IMessageSender(Protocol):
         """
         ...
 
+    def send_media_group(
+        self,
+        chat_id: int,
+        photo_urls: list[str],
+        caption: str | None = None,
+    ) -> None:
+        """Отправить группу фотографий (до 10 штук).
+
+        Args:
+            chat_id: ID чата получателя.
+            photo_urls: Список URL фотографий.
+            caption: Подпись к первому фото (HTML).
+        """
+        ...
+
     def send_markdown_as_html(
         self,
         chat_id: int,

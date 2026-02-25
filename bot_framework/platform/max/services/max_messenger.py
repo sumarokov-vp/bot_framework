@@ -57,6 +57,23 @@ class MaxMessenger:
         self._core.register_message(chat_id, message_id, flow_name)
         return BotMessage(chat_id=chat_id, message_id=message_id, text=text)
 
+    def send_media_group(
+        self,
+        chat_id: int,
+        photo_urls: list[str],
+        caption: str | None = None,
+    ) -> None:
+        if not photo_urls:
+            return
+        for i, url in enumerate(photo_urls[:10]):
+            body: dict[str, Any] = {
+                "attachments": [{"type": "image", "payload": {"url": url}}],
+            }
+            if caption and i == 0:
+                body["text"] = caption
+                body["format"] = "html"
+            self._core.api_client.send_message(body, chat_id=chat_id)
+
     def delete(self, chat_id: int, message_id: int) -> None:
         mid = self._core.int_to_mid(message_id)
         self._core.api_client.delete_message(mid)

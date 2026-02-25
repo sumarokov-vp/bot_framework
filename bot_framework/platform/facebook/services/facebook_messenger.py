@@ -48,6 +48,26 @@ class FacebookMessenger:
     ) -> BotMessage:
         return self.send(chat_id, text, ParseMode.PLAIN, keyboard, flow_name)
 
+    def send_media_group(
+        self,
+        chat_id: int,
+        photo_urls: list[str],
+        caption: str | None = None,
+    ) -> None:
+        if not photo_urls:
+            return
+        recipient_id = str(chat_id)
+        for i, url in enumerate(photo_urls[:10]):
+            payload: dict[str, Any] = {
+                "attachment": {
+                    "type": "image",
+                    "payload": {"url": url},
+                },
+            }
+            if caption and i == 0:
+                payload["text"] = caption
+            self._core.api_client.send_message(recipient_id, payload)
+
     def delete(self, chat_id: int, message_id: int) -> None:
         self._logger.debug("Facebook message deletion is limited; message_id=%s", message_id)
 

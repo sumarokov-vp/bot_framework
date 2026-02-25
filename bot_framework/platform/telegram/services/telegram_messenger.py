@@ -4,6 +4,8 @@ from io import BytesIO
 from logging import getLogger
 from typing import TYPE_CHECKING
 
+from telebot.types import InputMediaPhoto
+
 from bot_framework.core.entities.bot_message import BotMessage
 from bot_framework.core.entities.keyboard import Keyboard
 from bot_framework.core.entities.parse_mode import ParseMode
@@ -113,6 +115,27 @@ class TelegramMessenger:
             reply_markup=reply_markup,
         )
         return self._core.create_bot_message(chat_id, msg)
+
+    def send_media_group(
+        self,
+        chat_id: int,
+        photo_urls: list[str],
+        caption: str | None = None,
+    ) -> None:
+        if not photo_urls:
+            return
+        media = [
+            InputMediaPhoto(
+                media=url,
+                caption=caption if i == 0 else None,
+                parse_mode="HTML" if (caption and i == 0) else None,
+            )
+            for i, url in enumerate(photo_urls[:10])
+        ]
+        self._core.message_sender_bot.send_media_group(
+            chat_id=chat_id,
+            media=media,
+        )
 
     def download_document(self, file_id: str) -> bytes:
         file_info = self._core.file_downloader_bot.get_file(file_id)
