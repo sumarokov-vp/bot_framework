@@ -76,7 +76,7 @@ class MaxMessageHandlerRegistry:
         message = update.get("message", {})
         sender = message.get("sender", {})
         recipient = message.get("recipient", {})
-        body = message.get("body", {})
+        body = message.get("body", {}) or message.get("message", {})
 
         user_id = int(sender.get("user_id", 0))
         chat_id_raw = recipient.get("chat_id") or recipient.get("user_id")

@@ -50,7 +50,7 @@ class MaxPolling:
 
     def _handle_message_created(self, update: dict[str, Any]) -> None:
         message = update.get("message", {})
-        body = message.get("body", {})
+        body = message.get("body", {}) or message.get("message", {})
         raw_mid = body.get("mid", "")
 
         self._core.register_mid(raw_mid)
@@ -59,6 +59,30 @@ class MaxPolling:
             sender = message.get("sender", {})
             self._core.ensure_user_middleware.execute_from_user_dict(sender)
 
+        sender = message.get("sender", {})
+        recipient = message.get("recipient", {})
+        user_id = int(sender.get("user_id", 0))
+        chat_id = int(recipient.get("chat_id", 0))
+        if user_id and chat_id:
+            self._core.dialog_repo.upsert(user_id=user_id, chat_id=chat_id)
+        next_step_handler = self._core.next_step_registrar.pop(user_id)
+        if next_step_handler is not None:
+            bot_message = self._core.next_step_registrar.to_bot_message(
+                update,
+                self._core.mid_to_int,
+            )
+            next_step_handler.handle(bot_message)
+            return
+
+        text = body.get("text")
+        if not text and not raw_mid:
+            self._core.message_handler_registry.dispatch(
+                update,
+                self._core.mid_to_int,
+                command_override=BOT_STARTED_COMMAND,
+            )
+            return
+
         self._core.message_handler_registry.dispatch(
             update,
             self._core.mid_to_int,
@@ -66,7 +90,7 @@ class MaxPolling:
 
     def _handle_message_callback(self, update: dict[str, Any]) -> None:
         message = update.get("message", {})
-        body = message.get("body", {})
+        body = message.get("body", {}) or message.get("message", {})
         raw_mid = body.get("mid", "")
 
         self._core.register_mid(raw_mid)
@@ -83,6 +107,11 @@ class MaxPolling:
 
         if self._core.ensure_user_middleware:
             self._core.ensure_user_middleware.execute_from_user_dict(user)
+
+        user_id = int(user.get("user_id", 0))
+        chat_id = int(update.get("chat_id", 0))
+        if user_id and chat_id:
+            self._core.dialog_repo.upsert(user_id=user_id, chat_id=chat_id)
 
         synthetic_update = self._build_synthetic_message_update(update, user)
         self._core.message_handler_registry.dispatch(

@@ -6,6 +6,7 @@ from .services import (
     MaxMessageCore,
     MaxMessageHandlerRegistry,
     MaxMessenger,
+    MaxNextStepHandlerRegistrar,
     MaxPolling,
 )
 
@@ -17,5 +18,6 @@ __all__ = [
     "MaxMessageCore",
     "MaxMessageHandlerRegistry",
     "MaxMessenger",
+    "MaxNextStepHandlerRegistrar",
     "MaxPolling",
 ]

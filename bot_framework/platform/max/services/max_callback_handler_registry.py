@@ -31,7 +31,7 @@ class MaxCallbackHandlerRegistry:
         user_id = int(user.get("user_id", 0))
 
         message = update.get("message", {})
-        body = message.get("body", {})
+        body = message.get("body", {}) or message.get("message", {})
         raw_mid = body.get("mid")
         message_id = mid_to_int.get(raw_mid) if raw_mid else None
 

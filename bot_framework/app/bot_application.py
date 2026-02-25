@@ -80,9 +80,23 @@ class BotApplication:
         flow_message_storage = RedisFlowMessageStorage(redis_url=redis_url)
 
         if platform == "max":
+            from bot_framework.domain.role_management.repos import RoleRepo, UserRepo
+            from bot_framework.domain.role_management.services import EnsureUserExists
+            from bot_framework.platform.max.middleware import MaxEnsureUserMiddleware
+
+            ensure_user_exists = EnsureUserExists(
+                user_repo=UserRepo(database_url=database_url),
+                role_repo=RoleRepo(database_url=database_url),
+            )
+            ensure_user_middleware = MaxEnsureUserMiddleware(
+                ensure_user_exists=ensure_user_exists,
+            )
+
             self.core: TelegramMessageCore | MaxMessageCore = MaxMessageCore(
                 token=bot_token,
+                database_url=database_url,
                 flow_message_storage=flow_message_storage,
+                ensure_user_middleware=ensure_user_middleware,
             )
         else:
             self.core = TelegramMessageCore(
@@ -315,7 +329,7 @@ class BotApplication:
         handler: ICallbackHandler,
     ) -> None:
         config = MenuButtonConfig(phrase_key=phrase_key, handler=handler)
-        self._main_menu_sender.buttons.insert(0, config)
+        self._main_menu_sender.buttons.append(config)
 
     def set_start_allowed_roles(self, roles: set[str]) -> None:
         self._start_command_handler.allowed_roles = roles
@@ -346,8 +360,6 @@ class BotApplication:
 
     @property
     def next_step_registrar(self) -> INextStepHandlerRegistrar:
-        if not isinstance(self.core, TelegramMessageCore):
-            raise NotImplementedError("next_step_registrar is not supported for Max platform")
         return self.core.next_step_registrar
 
     @property

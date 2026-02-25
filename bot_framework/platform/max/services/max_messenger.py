@@ -26,8 +26,9 @@ class MaxMessenger:
         keyboard: Keyboard | None = None,
         flow_name: str | None = None,
     ) -> BotMessage:
+        resolved_chat_id = self._core.dialog_repo.get_chat_id(chat_id) or chat_id
         body = self._build_message_body(text, parse_mode, keyboard)
-        result = self._core.api_client.send_message(body, chat_id=chat_id)
+        result = self._core.api_client.send_message(body, chat_id=resolved_chat_id)
         message_data = result.get("message", {})
         bot_message = self._core.create_bot_message(chat_id, message_data)
         self._core.register_message(chat_id, bot_message.message_id, flow_name)
@@ -65,6 +66,7 @@ class MaxMessenger:
     ) -> None:
         if not photo_urls:
             return
+        resolved_chat_id = self._core.dialog_repo.get_chat_id(chat_id) or chat_id
         for i, url in enumerate(photo_urls[:10]):
             body: dict[str, Any] = {
                 "attachments": [{"type": "image", "payload": {"url": url}}],
@@ -72,7 +74,7 @@ class MaxMessenger:
             if caption and i == 0:
                 body["text"] = caption
                 body["format"] = "html"
-            self._core.api_client.send_message(body, chat_id=chat_id)
+            self._core.api_client.send_message(body, chat_id=resolved_chat_id)
 
     def delete(self, chat_id: int, message_id: int) -> None:
         mid = self._core.int_to_mid(message_id)
@@ -102,9 +104,10 @@ class MaxMessenger:
         if keyboard:
             attachments.append(self._core.convert_keyboard(keyboard))
 
-        result = self._core.api_client.send_message(body, chat_id=chat_id)
+        resolved_chat_id = self._core.dialog_repo.get_chat_id(chat_id) or chat_id
+        result = self._core.api_client.send_message(body, chat_id=resolved_chat_id)
         message_data = result.get("message", {})
-        bot_message = self._core.create_bot_message(chat_id, message_data)
+        bot_message = self._core.create_bot_message(resolved_chat_id, message_data)
         return bot_message
 
     def download_document(self, file_id: str) -> bytes:

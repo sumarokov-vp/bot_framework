@@ -4,6 +4,7 @@ from .max_callback_handler_registry import MaxCallbackHandlerRegistry
 from .max_message_core import MaxMessageCore
 from .max_message_handler_registry import MaxMessageHandlerRegistry
 from .max_messenger import MaxMessenger
+from .max_next_step_handler_registrar import MaxNextStepHandlerRegistrar
 from .max_polling import MaxPolling
 
 __all__ = [
@@ -13,5 +14,6 @@ __all__ = [
     "MaxMessageCore",
     "MaxMessageHandlerRegistry",
     "MaxMessenger",
+    "MaxNextStepHandlerRegistrar",
     "MaxPolling",
 ]

@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 from bot_framework.core.entities.bot_message import BotMessage
 from bot_framework.core.entities.keyboard import Keyboard
+from bot_framework.platform.max.repos import MaxDialogRepo
 
 if TYPE_CHECKING:
     from bot_framework.domain.flow_management.protocols.i_flow_message_storage import (
@@ -18,6 +19,7 @@ from .max_callback_answerer import MaxCallbackAnswerer
 from .max_callback_handler_registry import MaxCallbackHandlerRegistry
 from .max_message_handler_registry import MaxMessageHandlerRegistry
 from .max_messenger import MaxMessenger
+from .max_next_step_handler_registrar import MaxNextStepHandlerRegistrar
 from .max_polling import MaxPolling
 
 
@@ -25,6 +27,7 @@ class MaxMessageCore:
     def __init__(
         self,
         token: str,
+        database_url: str,
         flow_message_storage: IFlowMessageStorage | None = None,
         ensure_user_middleware: MaxEnsureUserMiddleware | None = None,
     ) -> None:
@@ -33,6 +36,7 @@ class MaxMessageCore:
         self._mid_to_int: dict[str, int] = {}
         self._int_to_mid: dict[int, str] = {}
         self.api_client = MaxApiClient(token)
+        self.dialog_repo = MaxDialogRepo(database_url=database_url)
         self._init_components()
 
     def _init_components(self) -> None:
@@ -46,7 +50,12 @@ class MaxMessageCore:
         self.callback_answerer: MaxCallbackAnswerer = MaxCallbackAnswerer(self)
         self.callback_handler_registry: MaxCallbackHandlerRegistry = MaxCallbackHandlerRegistry()
         self.message_handler_registry: MaxMessageHandlerRegistry = MaxMessageHandlerRegistry()
+        self._next_step_registrar: MaxNextStepHandlerRegistrar = MaxNextStepHandlerRegistrar()
         self._polling: MaxPolling = MaxPolling(self)
+
+    @property
+    def next_step_registrar(self) -> MaxNextStepHandlerRegistrar:
+        return self._next_step_registrar
 
     @property
     def mid_to_int(self) -> dict[str, int]:
