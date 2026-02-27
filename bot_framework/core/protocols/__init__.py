@@ -17,6 +17,7 @@ from .i_raw_forum_topic_editor import IRawForumTopicEditor
 from .i_thread_message_sender import IThreadMessageSender
 from .i_markdown_to_html_converter import IMarkdownToHtmlConverter
 from .i_message_core import IMessageCore
+from .i_message_core_base import IMessageCoreBase
 from .i_message_deleter import IMessageDeleter
 from .i_message_forwarder import IMessageForwarder
 from .i_message_handler import IMessageHandler
@@ -51,6 +52,7 @@ __all__ = [
     "IForumTopicEditor",
     "IMarkdownToHtmlConverter",
     "IMessageCore",
+    "IMessageCoreBase",
     "IMessageDeleter",
     "IMessageForwarder",
     "IMessageHandler",

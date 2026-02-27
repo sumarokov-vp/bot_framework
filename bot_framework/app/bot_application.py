@@ -25,10 +25,11 @@ from bot_framework.features.menus import (
     StartCommandHandler,
 )
 from bot_framework.features.menus.language_menu import LanguageMenuFactory
+from bot_framework.core.protocols import IMessageCoreBase
 from bot_framework.core.protocols.i_callback_handler import ICallbackHandler
-from bot_framework.domain.role_management.repos import RoleRepo, UserRepo
 from bot_framework.platform.telegram import CloseCallbackHandler, TelegramMessageCore
 from bot_framework.platform.max import MaxMessageCore
+from bot_framework.platform.max.max_dialogs import MaxDialogs
 
 if TYPE_CHECKING:
     from bot_framework.core.protocols import (
@@ -49,6 +50,8 @@ if TYPE_CHECKING:
 
 
 class BotApplication:
+    core: IMessageCoreBase
+
     def __init__(
         self,
         bot_token: str,
@@ -92,12 +95,12 @@ class BotApplication:
                 ensure_user_exists=ensure_user_exists,
             )
 
-            self.core: TelegramMessageCore | MaxMessageCore = MaxMessageCore(
+            self.core = MaxDialogs(
                 token=bot_token,
                 database_url=database_url,
                 flow_message_storage=flow_message_storage,
                 ensure_user_middleware=ensure_user_middleware,
-            )
+            ).core
         else:
             self.core = TelegramMessageCore(
                 bot_token=bot_token,
@@ -377,5 +380,5 @@ class BotApplication:
     def run(self) -> None:
         if isinstance(self.core, MaxMessageCore):
             self.core.run()
-        else:
+        elif isinstance(self.core, TelegramMessageCore):
             self.core.polling_bot.infinity_polling()
