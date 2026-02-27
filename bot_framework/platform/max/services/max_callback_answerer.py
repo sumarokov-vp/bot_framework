@@ -1,16 +1,12 @@
-from __future__ import annotations
-
 from logging import getLogger
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from .max_message_core import MaxMessageCore
+from .max_core_protocols import IMaxCallbackCore
 
 logger = getLogger(__name__)
 
 
 class MaxCallbackAnswerer:
-    def __init__(self, core: MaxMessageCore) -> None:
+    def __init__(self, core: IMaxCallbackCore) -> None:
         self._core = core
 
     def answer(

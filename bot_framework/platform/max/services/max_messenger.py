@@ -1,20 +1,19 @@
 from __future__ import annotations
 
 from logging import getLogger
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from bot_framework.core.entities.bot_message import BotMessage
 from bot_framework.core.entities.keyboard import Keyboard
 from bot_framework.core.entities.parse_mode import ParseMode
 
-if TYPE_CHECKING:
-    from .max_message_core import MaxMessageCore
+from .max_core_protocols import IMaxMessengerCore
 
 logger = getLogger(__name__)
 
 
 class MaxMessenger:
-    def __init__(self, core: MaxMessageCore) -> None:
+    def __init__(self, core: IMaxMessengerCore) -> None:
         self._core = core
         self._logger = getLogger(__name__)
 
@@ -111,9 +110,7 @@ class MaxMessenger:
         return bot_message
 
     def download_document(self, file_id: str) -> bytes:
-        response = self._core.api_client._client.get(file_id)
-        response.raise_for_status()
-        return response.content
+        return self._core.api_client.download_file(file_id)
 
     def _build_message_body(
         self,

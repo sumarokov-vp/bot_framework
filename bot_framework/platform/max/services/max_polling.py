@@ -1,18 +1,17 @@
 from __future__ import annotations
 
 from logging import getLogger
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
+from .max_bot_message_factory import MaxBotMessageFactory
+from .max_core_protocols import IMaxPollingCore
 from .max_update_parser import MaxParsedUpdate, MaxUpdateParser
-
-if TYPE_CHECKING:
-    from .max_message_core import MaxMessageCore
 
 logger = getLogger(__name__)
 
 
 class MaxPolling:
-    def __init__(self, core: MaxMessageCore) -> None:
+    def __init__(self, core: IMaxPollingCore) -> None:
         self._core = core
         self._parser = MaxUpdateParser()
         self._marker: int | None = None
@@ -92,8 +91,5 @@ class MaxPolling:
         if user_id and chat_id:
             self._core.dialog_repo.upsert(user_id=user_id, chat_id=chat_id)
 
-        self._core.message_handler_registry.dispatch(
-            parsed.raw_update,
-            self._core.mid_to_int,
-            command_override=parsed.command,
-        )
+        bot_message = MaxBotMessageFactory.from_parsed(parsed, self._core.mid_to_int)
+        self._core.message_handler_registry.dispatch_bot_message(bot_message)
