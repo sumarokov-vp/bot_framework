@@ -69,7 +69,7 @@ class MaxApiClient:
     ) -> dict[str, Any]:
         response = self._client.post(
             "/answers",
-            json=body,
+            json=body if body else {"notification": ""},
             params={"callback_id": callback_id},
         )
         if response.is_error:
