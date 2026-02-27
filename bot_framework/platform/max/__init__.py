@@ -1,3 +1,4 @@
+from .max_dialogs import MaxDialogs
 from .middleware import MaxEnsureUserMiddleware
 from .services import (
     MaxApiClient,
@@ -14,6 +15,7 @@ __all__ = [
     "MaxApiClient",
     "MaxCallbackAnswerer",
     "MaxCallbackHandlerRegistry",
+    "MaxDialogs",
     "MaxEnsureUserMiddleware",
     "MaxMessageCore",
     "MaxMessageHandlerRegistry",
