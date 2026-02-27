@@ -49,19 +49,6 @@ class MaxUpdateParser:
             "chat_type": "dialog",
         }
 
-        raw_update = {
-            "update_type": "message_created",
-            "timestamp": update.get("timestamp", 0),
-            "message": {
-                "sender": user,
-                "recipient": recipient,
-                "body": {
-                    "mid": "",
-                    "text": BOT_STARTED_COMMAND,
-                },
-            },
-        }
-
         return MaxParsedUpdate(
             update_type="bot_started",
             sender=user,
@@ -69,7 +56,7 @@ class MaxUpdateParser:
             text=BOT_STARTED_COMMAND,
             mid="",
             command=BOT_STARTED_COMMAND,
-            raw_update=raw_update,
+            raw_update=update,
         )
 
     def _parse_message_created(self, update: dict[str, Any]) -> MaxParsedUpdate:
