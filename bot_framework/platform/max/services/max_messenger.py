@@ -53,6 +53,8 @@ class MaxMessenger:
     ) -> BotMessage:
         mid = self._core.int_to_mid(message_id)
         body = self._build_message_body(text, parse_mode, keyboard)
+        if "attachments" not in body:
+            body["attachments"] = []
         self._core.api_client.edit_message(mid, body)
         self._core.register_message(chat_id, message_id, flow_name)
         return BotMessage(chat_id=chat_id, message_id=message_id, text=text)
