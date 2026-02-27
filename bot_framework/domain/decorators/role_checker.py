@@ -4,13 +4,32 @@ from typing import Any
 
 from bot_framework.core.entities.bot_callback import BotCallback
 from bot_framework.core.entities.bot_message import BotMessage
+from bot_framework.domain.role_management.repos.protocols import IRoleRepo
 
 CallbackHandler = Callable[[Any, BotCallback], None]
 MessageHandler = Callable[[Any, BotMessage], None]
 
+_role_repo: IRoleRepo | None = None
+
 
 class OperationNotAllowedError(Exception):
     pass
+
+
+def configure_role_checker(role_repo: IRoleRepo) -> None:
+    global _role_repo
+    _role_repo = role_repo
+
+
+def _get_role_repo(handler: Any) -> IRoleRepo:
+    if hasattr(handler, "role_repo"):
+        return handler.role_repo
+    if _role_repo is not None:
+        return _role_repo
+    raise AttributeError(
+        f"{type(handler).__name__} has no 'role_repo' attribute and "
+        "configure_role_checker() was not called"
+    )
 
 
 def check_roles[T: CallbackHandler](func: T) -> T:
@@ -21,7 +40,8 @@ def check_roles[T: CallbackHandler](func: T) -> T:
                 raise ValueError("callback.user_id is required but was None")
 
             telegram_id = callback.user_id
-            user_roles = self.role_repo.get_user_roles(user_id=telegram_id)
+            role_repo = _get_role_repo(self)
+            user_roles = role_repo.get_user_roles(user_id=telegram_id)
             user_role_names = {role.name for role in user_roles}
 
             if not (user_role_names & self.allowed_roles):
@@ -48,7 +68,8 @@ def check_message_roles[M: MessageHandler](func: M) -> M:
                 raise ValueError("message.from_user is required but was None")
 
             telegram_id = message.from_user.id
-            user_roles = self.role_repo.get_user_roles(user_id=telegram_id)
+            role_repo = _get_role_repo(self)
+            user_roles = role_repo.get_user_roles(user_id=telegram_id)
             user_role_names = {role.name for role in user_roles}
 
             if not (user_role_names & self.allowed_roles):

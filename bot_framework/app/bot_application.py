@@ -17,6 +17,7 @@ from bot_framework.domain.language_management.repos import LanguageRepo
 from bot_framework.domain.language_management.validators import (
     MissingTranslationsValidator,
 )
+from bot_framework.domain.decorators import configure_role_checker
 from bot_framework.domain.role_management.loaders import RoleLoader
 from bot_framework.domain.language_management.providers import RedisPhraseProvider
 from bot_framework.features.menus import (
@@ -112,6 +113,7 @@ class BotApplication:
         self._database_url = database_url
         self.user_repo = UserRepo(database_url=database_url)
         self.role_repo = RoleRepo(database_url=database_url)
+        configure_role_checker(self.role_repo)
         self.phrase_provider = RedisPhraseProvider(redis_url=redis_url)
         self.phrase_repo = self.phrase_provider  # обратная совместимость
 
