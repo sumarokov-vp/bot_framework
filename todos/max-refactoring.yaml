@@ -1,0 +1,95 @@
+title: "Рефакторинг модуля Max платформы"
+created: 2026-02-27
+tasks:
+  - id: max-001
+    priority: critical
+    title: "Выделить MaxMidRegistry из MaxMessageCore"
+    description: |
+      MaxMessageCore содержит нетривиальную логику маппинга mid↔int
+      с линейным пробированием при коллизиях хэша. Вынести в отдельный
+      класс MaxMidRegistry с методами register_mid(), mid_to_int(), int_to_mid().
+      Покрыть тестами логику коллизий.
+    files:
+      - bot_framework/platform/max/services/max_message_core.py
+    status: pending
+
+  - id: max-002
+    priority: critical
+    title: "Убрать TYPE_CHECKING для MaxMessageCore, ввести протоколы"
+    description: |
+      MaxPolling, MaxMessenger, MaxCallbackAnswerer зависят от конкретного
+      MaxMessageCore через TYPE_CHECKING. Нужно либо убрать TYPE_CHECKING
+      и зависеть явно, либо создать минимальные протоколы по ISP.
+    files:
+      - bot_framework/platform/max/services/max_polling.py
+      - bot_framework/platform/max/services/max_messenger.py
+      - bot_framework/platform/max/services/max_callback_answerer.py
+    status: pending
+
+  - id: max-003
+    priority: critical
+    title: "Разбить IMessageCore на минимальные протоколы"
+    description: |
+      IMessageCore содержит Telegram-специфичные свойства и не может быть
+      реализован Max-платформой. Разбить на ISP-протоколы: IMessageSendingCore,
+      IFlowMessageCore, IKeyboardCore и т.д.
+    files:
+      - bot_framework/core/protocols/i_message_core.py
+    status: pending
+
+  - id: max-004
+    priority: medium
+    title: "Устранить дублирование _to_bot_message()"
+    description: |
+      Идентичный код парсинга dict→BotMessage в max_message_handler_registry.py
+      и max_next_step_handler_registrar.py, частично в max_message_core.py.
+      Вынести в MaxBotMessageFactory или расширить MaxUpdateParser.
+    files:
+      - bot_framework/platform/max/services/max_message_handler_registry.py
+      - bot_framework/platform/max/services/max_next_step_handler_registrar.py
+      - bot_framework/platform/max/services/max_message_core.py
+    status: pending
+
+  - id: max-005
+    priority: medium
+    title: "Добавить download_file() в MaxApiClient"
+    description: |
+      max_messenger.py обращается к приватному _client напрямую:
+      self._core.api_client._client.get(file_id). Добавить публичный метод
+      download_file(url) в MaxApiClient.
+    files:
+      - bot_framework/platform/max/services/max_api_client.py
+      - bot_framework/platform/max/services/max_messenger.py
+    status: pending
+
+  - id: max-006
+    priority: medium
+    title: "Перенести создание зависимостей в composition root"
+    description: |
+      MaxMessageCore создаёт все зависимости в _init_components().
+      Перенести сборку графа зависимостей в MaxDialogs или в точку входа
+      потребителя. MaxMessageCore должен получать зависимости через конструктор.
+    files:
+      - bot_framework/platform/max/services/max_message_core.py
+      - bot_framework/platform/max/max_dialogs.py
+    status: pending
+
+  - id: max-007
+    priority: low
+    title: "Убрать синтетический raw_update в MaxUpdateParser"
+    description: |
+      _parse_bot_started() строит фиктивный raw_update, имитирующий message_created.
+      Скрытый контракт с MaxPolling. Передавать параметры явно через поля MaxParsedUpdate.
+    files:
+      - bot_framework/platform/max/services/max_update_parser.py
+    status: pending
+
+  - id: max-008
+    priority: low
+    title: "Вынести language_code='ru' в константу"
+    description: |
+      max_ensure_user_middleware.py хардкодит language_code="ru".
+      Вынести в MAX_DEFAULT_LANGUAGE_CODE на уровне модуля.
+    files:
+      - bot_framework/platform/max/services/max_ensure_user_middleware.py
+    status: pending
