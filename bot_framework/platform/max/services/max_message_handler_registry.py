@@ -4,8 +4,9 @@ from collections.abc import Callable
 from logging import getLogger
 from typing import Any
 
-from bot_framework.core.entities.bot_message import BotMessage, BotMessageUser
+from bot_framework.core.entities.bot_message import BotMessage
 from bot_framework.core.protocols.i_message_handler import IMessageHandler
+from bot_framework.platform.max.services.max_bot_message_factory import MaxBotMessageFactory
 
 
 class _RegisteredHandler:
@@ -43,6 +44,9 @@ class MaxMessageHandlerRegistry:
         command_override: str | None = None,
     ) -> None:
         bot_message = self._to_bot_message(update, mid_to_int, command_override)
+        self.dispatch_bot_message(bot_message)
+
+    def dispatch_bot_message(self, bot_message: BotMessage) -> None:
         for registered in self._handlers:
             if self._matches(registered, bot_message):
                 registered.handler.handle(bot_message)
@@ -73,27 +77,4 @@ class MaxMessageHandlerRegistry:
         mid_to_int: dict[str, int],
         command_override: str | None,
     ) -> BotMessage:
-        message = update.get("message", {})
-        sender = message.get("sender", {})
-        recipient = message.get("recipient", {})
-        body = message.get("body", {}) or message.get("message", {})
-
-        user_id = int(sender.get("user_id", 0))
-        chat_id_raw = recipient.get("chat_id") or recipient.get("user_id")
-        chat_id = int(chat_id_raw) if chat_id_raw is not None else user_id
-
-        raw_mid = body.get("mid", "")
-        message_id = mid_to_int.get(raw_mid, hash(raw_mid) & 0x7FFFFFFF)
-
-        text = command_override or body.get("text")
-
-        from_user = BotMessageUser(id=user_id)
-        bot_message = BotMessage(
-            chat_id=chat_id,
-            message_id=message_id,
-            user_id=user_id,
-            text=text,
-            from_user=from_user,
-        )
-        bot_message.set_original(update)
-        return bot_message
+        return MaxBotMessageFactory.from_update(update, mid_to_int, command_override)
