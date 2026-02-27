@@ -107,5 +107,10 @@ class MaxApiClient:
         response.raise_for_status()
         return response.json()
 
+    def download_file(self, url: str) -> bytes:
+        response = self._client.get(url)
+        response.raise_for_status()
+        return response.content
+
     def close(self) -> None:
         self._client.close()
