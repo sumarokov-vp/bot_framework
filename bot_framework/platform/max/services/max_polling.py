@@ -3,17 +3,18 @@ from __future__ import annotations
 from logging import getLogger
 from typing import TYPE_CHECKING, Any
 
+from .max_update_parser import MaxParsedUpdate, MaxUpdateParser
+
 if TYPE_CHECKING:
     from .max_message_core import MaxMessageCore
 
 logger = getLogger(__name__)
 
-BOT_STARTED_COMMAND = "/start"
-
 
 class MaxPolling:
     def __init__(self, core: MaxMessageCore) -> None:
         self._core = core
+        self._parser = MaxUpdateParser()
         self._marker: int | None = None
         self._logger = getLogger(__name__)
 
@@ -37,109 +38,62 @@ class MaxPolling:
             self._dispatch(update)
 
     def _dispatch(self, update: dict[str, Any]) -> None:
-        update_type = update.get("update_type")
+        parsed = self._parser.parse(update)
 
-        if update_type == "message_created":
-            self._handle_message_created(update)
-        elif update_type == "message_callback":
-            self._handle_message_callback(update)
-        elif update_type == "bot_started":
-            self._handle_bot_started(update)
+        if parsed.update_type == "message_created":
+            self._handle_message_created(parsed)
+        elif parsed.update_type == "message_callback":
+            self._handle_message_callback(parsed)
+        elif parsed.update_type == "bot_started":
+            self._handle_bot_started(parsed)
         else:
-            self._logger.debug("Unhandled update type: %s", update_type)
+            self._logger.debug("Unhandled update type: %s", parsed.update_type)
 
-    def _handle_message_created(self, update: dict[str, Any]) -> None:
-        message = update.get("message", {})
-        body = message.get("body", {}) or message.get("message", {})
-        raw_mid = body.get("mid", "")
-
-        self._core.register_mid(raw_mid)
+    def _handle_message_created(self, parsed: MaxParsedUpdate) -> None:
+        self._core.register_mid(parsed.mid)
 
         if self._core.ensure_user_middleware:
-            sender = message.get("sender", {})
-            self._core.ensure_user_middleware.execute_from_user_dict(sender)
+            self._core.ensure_user_middleware.execute_from_user_dict(parsed.sender)
 
-        sender = message.get("sender", {})
-        recipient = message.get("recipient", {})
-        user_id = int(sender.get("user_id", 0))
-        chat_id = int(recipient.get("chat_id", 0))
+        user_id = int(parsed.sender.get("user_id", 0))
+        chat_id = int(parsed.recipient.get("chat_id", 0))
         if user_id and chat_id:
             self._core.dialog_repo.upsert(user_id=user_id, chat_id=chat_id)
+
         next_step_handler = self._core.next_step_registrar.pop(user_id)
         if next_step_handler is not None:
             bot_message = self._core.next_step_registrar.to_bot_message(
-                update,
+                parsed.raw_update,
                 self._core.mid_to_int,
             )
             next_step_handler.handle(bot_message)
             return
 
-        text = body.get("text")
-        if not text and not raw_mid:
-            self._core.message_handler_registry.dispatch(
-                update,
-                self._core.mid_to_int,
-                command_override=BOT_STARTED_COMMAND,
-            )
-            return
-
         self._core.message_handler_registry.dispatch(
-            update,
+            parsed.raw_update,
             self._core.mid_to_int,
+            command_override=parsed.command,
         )
 
-    def _handle_message_callback(self, update: dict[str, Any]) -> None:
-        message = update.get("message", {})
-        body = message.get("body", {}) or message.get("message", {})
-        raw_mid = body.get("mid", "")
-
-        self._core.register_mid(raw_mid)
+    def _handle_message_callback(self, parsed: MaxParsedUpdate) -> None:
+        self._core.register_mid(parsed.mid)
 
         if self._core.ensure_user_middleware:
-            callback = update.get("callback", {})
-            user = callback.get("user", {})
-            self._core.ensure_user_middleware.execute_from_user_dict(user)
+            self._core.ensure_user_middleware.execute_from_user_dict(parsed.sender)
 
-        self._core.callback_handler_registry.dispatch(update, self._core.mid_to_int)
+        self._core.callback_handler_registry.dispatch(parsed.raw_update, self._core.mid_to_int)
 
-    def _handle_bot_started(self, update: dict[str, Any]) -> None:
-        user = update.get("user", {})
-
+    def _handle_bot_started(self, parsed: MaxParsedUpdate) -> None:
         if self._core.ensure_user_middleware:
-            self._core.ensure_user_middleware.execute_from_user_dict(user)
+            self._core.ensure_user_middleware.execute_from_user_dict(parsed.sender)
 
-        user_id = int(user.get("user_id", 0))
-        chat_id = int(update.get("chat_id", 0))
+        user_id = int(parsed.sender.get("user_id", 0))
+        chat_id = int(parsed.recipient.get("chat_id", 0))
         if user_id and chat_id:
             self._core.dialog_repo.upsert(user_id=user_id, chat_id=chat_id)
 
-        synthetic_update = self._build_synthetic_message_update(update, user)
         self._core.message_handler_registry.dispatch(
-            synthetic_update,
+            parsed.raw_update,
             self._core.mid_to_int,
-            command_override=BOT_STARTED_COMMAND,
+            command_override=parsed.command,
         )
-
-    def _build_synthetic_message_update(
-        self,
-        update: dict[str, Any],
-        user: dict[str, Any],
-    ) -> dict[str, Any]:
-        chat_id = update.get("chat_id")
-        user_id = user.get("user_id")
-        return {
-            "update_type": "message_created",
-            "timestamp": update.get("timestamp", 0),
-            "message": {
-                "sender": user,
-                "recipient": {
-                    "chat_id": chat_id,
-                    "user_id": user_id,
-                    "chat_type": "dialog",
-                },
-                "body": {
-                    "mid": "",
-                    "text": BOT_STARTED_COMMAND,
-                },
-            },
-        }
