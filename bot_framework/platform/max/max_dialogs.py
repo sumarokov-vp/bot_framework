@@ -9,6 +9,7 @@ from .services.max_callback_answerer import MaxCallbackAnswerer
 from .services.max_callback_handler_registry import MaxCallbackHandlerRegistry
 from .services.max_message_core import MaxMessageCore
 from .services.max_message_handler_registry import MaxMessageHandlerRegistry
+from .services.max_keyboard_validator import MaxKeyboardValidator
 from .services.max_messenger import MaxMessenger
 from .services.max_mid_registry import MaxMidRegistry
 from .services.max_next_step_handler_registrar import MaxNextStepHandlerRegistrar
@@ -43,7 +44,7 @@ class MaxDialogs:
             ensure_user_middleware=ensure_user_middleware,
         )
 
-        messenger = MaxMessenger(core)
+        messenger = MaxMessenger(core, MaxKeyboardValidator())
         core.setup(
             messenger=messenger,
             callback_answerer=MaxCallbackAnswerer(core),

@@ -8,13 +8,15 @@ from bot_framework.core.entities.keyboard import Keyboard
 from bot_framework.core.entities.parse_mode import ParseMode
 
 from .max_core_protocols import IMaxMessengerCore
+from .max_keyboard_validator import MaxKeyboardValidator
 
 logger = getLogger(__name__)
 
 
 class MaxMessenger:
-    def __init__(self, core: IMaxMessengerCore) -> None:
+    def __init__(self, core: IMaxMessengerCore, keyboard_validator: MaxKeyboardValidator) -> None:
         self._core = core
+        self._keyboard_validator = keyboard_validator
         self._logger = getLogger(__name__)
 
     def send(
@@ -128,6 +130,7 @@ class MaxMessenger:
             body["format"] = "markdown"
 
         if keyboard:
+            self._keyboard_validator.validate(keyboard)
             body["attachments"] = [self._core.convert_keyboard(keyboard)]
 
         return body
