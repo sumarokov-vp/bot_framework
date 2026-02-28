@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+from logging import getLogger
 from typing import Any
 
 from bot_framework.core.entities.bot_message import BotMessage
 from bot_framework.core.protocols.i_message_handler import IMessageHandler
 from bot_framework.platform.max.services.max_bot_message_factory import MaxBotMessageFactory
+
+logger = getLogger(__name__)
 
 
 class MaxNextStepHandlerRegistrar:
@@ -16,10 +19,20 @@ class MaxNextStepHandlerRegistrar:
         message: BotMessage,
         handler: IMessageHandler,
     ) -> None:
-        self._handlers[message.user_id] = handler
+        logger.info(
+            "register next_step: chat_id=%s handler=%s",
+            message.chat_id,
+            type(handler).__name__,
+        )
+        self._handlers[message.chat_id] = handler
 
-    def pop(self, user_id: int) -> IMessageHandler | None:
-        return self._handlers.pop(user_id, None)
+    def pop(self, chat_id: int) -> IMessageHandler | None:
+        handler = self._handlers.pop(chat_id, None)
+        logger.info(
+            "pop next_step: chat_id=%s found=%s",
+            chat_id, type(handler).__name__ if handler else None,
+        )
+        return handler
 
     def to_bot_message(
         self,

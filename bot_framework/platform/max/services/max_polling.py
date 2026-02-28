@@ -34,7 +34,10 @@ class MaxPolling:
 
         updates: list[dict[str, Any]] = result.get("updates", [])
         for update in updates:
-            self._dispatch(update)
+            try:
+                self._dispatch(update)
+            except Exception:
+                self._logger.exception("Error processing update")
 
     def _dispatch(self, update: dict[str, Any]) -> None:
         parsed = self._parser.parse(update)
@@ -56,10 +59,12 @@ class MaxPolling:
 
         user_id = int(parsed.sender.get("user_id", 0))
         chat_id = int(parsed.recipient.get("chat_id", 0))
+        self._logger.info("message_created from user_id=%s chat_id=%s", user_id, chat_id)
         if user_id and chat_id:
             self._core.dialog_repo.upsert(user_id=user_id, chat_id=chat_id)
 
-        next_step_handler = self._core.next_step_registrar.pop(user_id)
+        next_step_handler = self._core.next_step_registrar.pop(chat_id)
+        self._logger.info("next_step_handler for chat %s: %s", chat_id, type(next_step_handler).__name__ if next_step_handler else None)
         if next_step_handler is not None:
             bot_message = self._core.next_step_registrar.to_bot_message(
                 parsed.raw_update,
@@ -68,6 +73,7 @@ class MaxPolling:
             next_step_handler.handle(bot_message)
             return
 
+        self._logger.info("No next_step_handler, dispatching to message_handler_registry (command=%s)", parsed.command)
         self._core.message_handler_registry.dispatch(
             parsed.raw_update,
             self._core.mid_to_int,

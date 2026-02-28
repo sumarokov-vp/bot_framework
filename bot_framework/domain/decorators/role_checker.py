@@ -51,6 +51,7 @@ def check_roles[T: CallbackHandler](func: T) -> T:
                         text=f"You do not have the required roles: {self.allowed_roles}",
                         show_alert=True,
                     )
+                    return
                 raise OperationNotAllowedError(
                     f"User {telegram_id} does not have required roles: {self.allowed_roles}"
                 )
@@ -84,6 +85,7 @@ def check_message_roles[M: MessageHandler](func: M) -> M:
                         chat_id=message.chat_id,
                         text=f"You do not have the required roles: {self.allowed_roles}",
                     )
+                    return
                 raise OperationNotAllowedError(
                     f"User {telegram_id} does not have required roles: {self.allowed_roles}"
                 )
