@@ -91,7 +91,7 @@ class MaxMessageCore:
         }
 
     def create_bot_message(self, chat_id: int, msg: dict[str, Any]) -> BotMessage:
-        body = msg.get("body", {})
+        body = msg.get("body") or msg.get("message") or {}
         raw_mid = body.get("mid", "")
         message_id = self.register_mid(raw_mid) if raw_mid else 0
 
